@@ -181,6 +181,34 @@
 								<p><label for="human_version">Human Readable Version Number</label> <input type="text" name="human_version" id="human_version" value="<?PHP echo $human_version;?>" class="text"></p>
 								<p><label for="release_notes">Release Notes</label> <textarea class="text" name="release_notes" id="release_notes"><?PHP echo $release_notes; ?></textarea></p>
 								<p><label for="file">Application Archive</label> <input type="file" name="file" id="file"></p>
+								<!-- BEGIN adib 7-Apr-2010 10:27 -->
+								<?php
+									$folderContents = scandir($Config->uploadFolder);
+									if(count($folderContents) > 0) {
+								?>
+								<p>Choose a file to upload or select an already-uploaded file listed below.</p>
+								<table border="1">
+								<tr>
+									<th width="5%">&nbsp;</th>
+									<th>File name</th>
+								</tr>
+								<?php
+										foreach($folderContents as $fileName) { 
+											if(empty($fileName) || strpos($fileName, '.') === 0) {
+												// skip hidden dotfiles or directory entries
+												continue;
+											}
+								?>
+									<tr>
+										<td align="right"><input type="radio" name="existingUploadedFile" id="existingUploadedFile" value="<?php echo $fileName; ?>" <?php echo !empty($_POST['existingUploadedFile']) && $_POST['existingUploadedFile'] === $fileName ? 'CHECKED="CHECKED"' : '' ; ?> /></td>
+										<td align="left"><tt><?php echo $fileName; ?></tt></td>
+									</tr>
+								<?php
+										} // foreach($file as $folderContents)
+									} // count($folderContents) > 0
+								?>
+								</table>
+								<!-- END adib 7-Apr-2010 10:27 -->
 								<p><input type="submit" name="btnCreateVersion" value="Create Version" id="btnCreateVersion"></p>
 							</form>
 						</div>

@@ -43,16 +43,63 @@
 			$v->release_notes  = $_POST['release_notes'];
 			$v->dt             = dater();
 			$v->downloads      = 0;
-			$v->filesize       = filesize($_FILES['file']['tmp_name']);
-			$v->signature      = sign_file($_FILES['file']['tmp_name'], $app->sparkle_pkey);
 			
-			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . substr($_FILES['file']['name'], -3);
-			$v->url = slash($app->s3path) . $object;
-			$info   = parse_url($app->s3path);
-			$object = slash($info['path']) . $object;
-			chmod($_FILES['file']['tmp_name'], 0755);
-			$s3 = new S3($app->s3key, $app->s3pkey);
-			$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+			// BEGIN adib 7-Apr-2010 10:58
+			//$v->filesize       = filesize($_FILES['file']['tmp_name']);
+			//$v->signature      = sign_file($_FILES['file']['tmp_name'], $app->sparkle_pkey);
+			//$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . substr($_FILES['file']['name'], -3);
+			$v->filesize       = filesize($uploadedFile['tmp_name']);
+			$v->signature      = sign_file($uploadedFile['tmp_name'], $app->sparkle_pkey);
+			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . substr($uploadedFile['name'], -3);
+			// END adib 7-Apr-2010 10:58
+			
+			// BEGIN adib 7-Apr-2010 12:36
+			// upload to S3 only if its configured.
+			if(!empty($app->s3path)) {
+			// END adib 7-Apr-2010 12:36
+			
+				$v->url = slash($app->s3path) . $object;
+				$info   = parse_url($app->s3path);
+				$object = slash($info['path']) . $object;
+				
+				// BEGIN adib 7-Apr-2010 10:59
+				//chmod($_FILES['file']['tmp_name'], 0755);
+				if(is_uploaded_file($uploadedFile['tmp_name'])) {
+					chmod($uploadedFile['tmp_name'], 0755);
+				}
+				// END adib 7-Apr-2010 10:59
+				
+				$s3 = new S3($app->s3key, $app->s3pkey);
+				
+				// BEGIN adib 7-Apr-2010 11:00
+				//$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+				$s3->uploadFile($app->s3bucket, $object, $uploadedFile['tmp_name'], true);
+				// END adib 7-Apr-2010 11:00
+				
+			// BEGIN adib 7-Apr-2010 12:37
+			} else if (!empty($Config->downloadBaseFolder)) {
+				// upload into a folder local to the web server.
+				$downloadFolder = realpath($Config->downloadBaseFolder) . '/' . $app->id;
+				if(!is_dir($downloadFolder)) {
+					if(!mkdir($downloadFolder, 0755, true)) {
+						die('Could not create download folder ' . $downloadFolder);
+					} 
+				}
+				
+				$destinationFile = $downloadFolder . '/' . $object;
+				
+				if(is_uploaded_file($uploadedFile['tmp_name'])) {
+					move_uploaded_file($uploadedFile['tmp_name'], $destinationFile);
+				} else {
+					// just copy the file
+					copy($uploadedFile['tmp_name'],$destinationFile);
+				}
+				chmod($destinationFile,0644);
+				
+				$v->url = $Config->downloadBaseURL . '/' . $app->id . '/' . $object;
+			} // !empty($app->s3path)
+			// END adib 7-Apr-2010 12:37
+			
 			$v->insert();
 
 			redirect('versions.php?id=' . $app->id);
@@ -86,6 +133,12 @@
         file_put_contents($key_tmp_file, $keydata);
 
         $signed_data = shell_exec("openssl dgst -dss1 -sign $key_tmp_file < $hash_tmp_file");
+		
+		// BEGIN adib 7-Apr-2010 12:47
+		// delete the key and hash file since leaving it around may be a security issue in shared web hosting environments.
+		unlink($key_tmp_file);
+		unlink($hash_tmp_file);
+		// END adib 7-Apr-2010 12:47
 
         return base64_encode($signed_data);     
     }

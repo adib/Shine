@@ -79,6 +79,18 @@
             $this->authDomain         = $_SERVER['HTTP_HOST'];
             $this->useHashedPasswords = false;
             $this->authSalt           = ''; // Pick any random string of characters
+            
+            // BEGIN adib 7-Apr-2010 10:22
+            // incoming staging folder to upload new file packages.
+            // users will have an option to select files from this folder instead of uploading them
+            // via the web browser.
+            $this->uploadFolder	= '';
+            // variables downloadBaseFolder and downloadBaseURL are used as a fallback file storage 
+            // when Amazon S3 is not configured for the application.
+            $this->downloadBaseFolder = '';		// base file name for file downloads.  Should be under the web root folder.
+            $this->downloadBaseURL	  = '';		// the URL base location of the above file.
+            // END adib 7-Apr-2010 10:22
+            
         }
 
         // Add code/variables to be run only on production servers

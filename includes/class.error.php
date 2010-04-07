@@ -225,6 +225,20 @@
 
             return true;
         }
+        
+        // BEGIN adib 7-Apr-2010 11:34
+        // did we have a readable file?
+        public function valid_file($fileName, $id)
+        {
+            if(!is_readable($fileName))
+            {
+                $this->add($id, 'You have chosen an invalid file. Please try again.');
+                return false;
+            }
+
+            return true;
+        }
+        // END adib 7-Apr-2010 11:34
 
         // Valid 5 digit zip code?
         public function zip($val, $id, $name = null)

@@ -3,14 +3,36 @@
 	$Auth->requireAdmin('login.php');
 	$nav = 'applications';
 	
+	// BEGIN adib 7-Apr-2010 12:44
+ 	$Config = Config::getConfig();
+	// END adib 7-Apr-2010 12:44
+	
 	$app = new Application($_GET['id']);
 	if(!$app->ok()) redirect('index.php');
 
 	if(isset($_POST['btnCreateVersion']))
 	{
+		// BEGIN adib 7-Apr-2010 10:54
+		// replace $_FILES['file'] with $uploadedFile
+		$uploadedFile = $_FILES['file'];
+		// END adib 7-Apr-2010 10:54
+		
 		$Error->blank($_POST['version_number'], 'Version Number');
 		$Error->blank($_POST['human_version'], 'Human Readable Version Number');
-		$Error->upload($_FILES['file'], 'file');
+
+		// BEGIN adib 7-Apr-2010 10:57
+		//$Error->upload($_FILES['file'], 'file');
+		if(empty($uploadedFile['tmp_name'])) {
+			$uploadFolder = $Config->uploadFolder;
+			if(!empty($_POST['existingUploadedFile']) && !empty($uploadFolder)) {
+				$uploadedFile['name'] = $_POST['existingUploadedFile'];
+				$uploadedFile['tmp_name'] = $uploadFolder . '/' . $_POST['existingUploadedFile'];
+			}
+			$Error->valid_file($uploadedFile['tmp_name'],'file');
+		} else {
+			$Error->upload($uploadedFile, 'file');
+		}
+		// END adib 7-Apr-2010 10:57
 		
 		if($Error->ok())
 		{

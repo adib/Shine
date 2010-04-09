@@ -79,9 +79,9 @@
 			// BEGIN adib 7-Apr-2010 12:37
 			} else if (!empty($Config->downloadBaseFolder)) {
 				// upload into a folder local to the web server.
-				$downloadFolder = realpath($Config->downloadBaseFolder) . '/' . $app->id;
+				$downloadFolder = $Config->downloadBaseFolder . '/' . $app->id;
 				if(!is_dir($downloadFolder)) {
-					if(!mkdir($downloadFolder, 0755, true)) {
+					if(!mkdir($downloadFolder, 0775, true)) {
 						die('Could not create download folder ' . $downloadFolder);
 					} 
 				}
@@ -94,7 +94,7 @@
 					// just copy the file
 					copy($uploadedFile['tmp_name'],$destinationFile);
 				}
-				chmod($destinationFile,0644);
+				chmod($destinationFile,0664);
 				
 				$v->url = $Config->downloadBaseURL . '/' . $app->id . '/' . $object;
 			} // !empty($app->s3path)
@@ -194,7 +194,7 @@
 								</tr>
 								<?php
 										foreach($folderContents as $fileName) { 
-											if(empty($fileName) || strpos($fileName, '.') === 0) {
+											if(empty($fileName) || strpos($fileName, '.') === 0 || is_dir($Config->uploadFolder . '/' . $fileName)) {
 												// skip hidden dotfiles or directory entries
 												continue;
 											}

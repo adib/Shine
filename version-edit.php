@@ -9,6 +9,42 @@
 	$app = new Application($v->app_id);
 	if(!$app->ok()) redirect('index.php');
 	
+	// BEGIN adib 7-Apr-2010 18:53
+	// handle version updates
+	if(isset($_POST['btnUpdate']))
+	{
+		$hasData = false;
+		if(!empty($_POST['version_number'])) {
+			$v->version_number = $_POST['version_number'];
+			$hasData = true;
+		}
+		if(!empty($_POST['human_version'])) {
+			$v->human_version = $_POST['human_version'];
+			$hasData = true;
+		}
+		if(!empty($_POST['release_notes'])) {
+			$v->release_notes  = $_POST['release_notes'];
+			$hasData = true;
+		}
+		if(!empty($_POST['url'])) {
+			$v->url  = $_POST['url'];
+			$hasData = true;
+		}
+		if(!empty($_POST['signature'])) {
+			$v->signature  = $_POST['signature'];
+			$hasData = true;
+		}
+		if(!empty($_POST['filesize'])) {
+			$v->filesize  = $_POST['filesize'];	
+			$hasData = true;
+		}
+		if($hasData) {
+			$v->update();
+		}
+		redirect('version-edit.php?id=' . $v->id);
+	}
+	// END adib 7-Apr-2010 18:53
+	
 	if(isset($_POST['btnDelete']))
 	{
 		$v->delete();
@@ -62,7 +98,12 @@
 								<p><label for="release_notes">Release Notes</label> <textarea class="text" name="release_notes" id="release_notes"><?PHP echo $release_notes; ?></textarea></p>
 								<p><label for="filesize">Filesize</label> <input type="text" name="filesize" id="filesize" value="<?PHP echo $filesize; ?>" class="text"></p>
 								<p><label for="signature">Sparkle Signature</label> <input type="text" name="signature" id="signature" value="<?PHP echo $signature; ?>" class="text"></p>
-								<p><input type="submit" name="btnDelete" value="Delete Version" id="btnDelete" onclick="return confirm('Are you sure?');"></p>
+								<p><input type="submit" name="btnDelete" value="Delete Version" id="btnDelete" onclick="return confirm('Are you sure?');">
+								<!-- BEGIN adib 7-Apr-2010 18:52 -->
+								&nbsp;
+								<input type="submit" name="btnUpdate" value="Update Version Data" id="btnUpdate" onclick="return confirm('Update version data?');">
+								<!-- END adib 7-Apr-2010 18:52 -->
+								</p>
 							</form>
 						</div>
 					</div>

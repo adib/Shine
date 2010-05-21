@@ -231,7 +231,15 @@
 
 		public function emailLicenseAP()
 		{
+			
 			$app = new Application($this->app_id);
+
+			// BEGIN adib 21-Apr-2010 03:56
+			// only send an e-mail if the "from" address is configured.
+			if(strlen(trim($app->from_email)) == 0) {
+				return;
+			}
+			// END adib 21-Apr-2010 03:56
 
 			// Create a random boundary
 			$boundary = base64_encode(md5(rand()));

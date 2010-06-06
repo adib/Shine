@@ -366,3 +366,163 @@
             parent::__construct('tweets', array('tweet_id', 'app_id', 'username', 'dt', 'body', 'profile_img', 'new', 'replied_to', 'reply_date', 'deleted'), $id);
         }
     }
+    
+    // BEGIN adib 5-Jun-2010 10:13
+    /*
+    CREATE TABLE `customer_registration` (
+      `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+      `app_id` int(11) DEFAULT NULL COMMENT 'Shine (Mac) application ID',
+      `customer_name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Customer real name',
+      `email_user` varchar(64) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The left part of the @ sign in the e-mail',
+      `email_domain` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The right part of the @ sign in the e-mail',
+      `email_confirmed` ENUM('YES','NO') NOT NULL DEFAULT 'NO' COMMENT 'Whether the user have confirmed the e-mail.',
+      `dt_created` datetime DEFAULT NULL COMMENT 'Created timestamp',
+      `dt_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Updated timestamp',
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 
+    */
+    
+    class CustomerRegistration extends DBObject 
+    {
+    	public $customerEmail;
+    	
+    	function __construct($id = null)
+    	{
+    		parent::__construct('customer_registration',array(
+    				'app_id',
+    				'customer_name',
+    				'email_user',
+    				'email_domain',
+    				'dt_created',
+    				'dt_updated',
+    				'email_confirmed'
+    			),
+    			$id
+    		);
+    	}
+    	public function select($id, $column = null) {
+    		parent::select($id,$column);
+    		$this->customerEmail = $this->email_user . '@' . $this->email_domain;
+    	}
+    	
+    	
+    	function insertOrUpdate() {
+    		$mailParts = explode('@',$this->customerEmail,2);
+    		// the user part of an e-mail address is case _sensitive_
+    		// while the domain part is case insensitive.
+    		$this->email_user = $mailParts[0];
+    		$this->email_domain = strtolower($mailParts[1]);
+    		// TODO
+    		
+    		$db = Database::getDatabase();			
+    		$result = $db->query("SELECT id FROM {$this->tableName} WHERE email_user = :user AND email_domain = :domain LIMIT 1",array( 'user' => $this->email_user , 'domain' => $this->email_domain));
+    		$existingID = $db->getValue();
+    		if($existingID === FALSE) {
+    			// no existing ID, insert
+    			$this->dt_created = date ("Y-m-d H:i:s");
+    			$this->insert();
+    		} else {
+    			$this->id = $existingID;
+    			$this->dt_updated = date ("Y-m-d H:i:s");
+    			$this->update();
+    		}
+    		return $this->id;
+    	}
+    	
+	        public function update()
+	        {
+	            if(is_null($this->id)) return false;
+	
+	            $db = Database::getDatabase();
+	
+	            if(count($this->columns) == 0) return;
+	
+	            $sql = "UPDATE {$this->tableName} SET ";
+	            foreach($this->columns as $k => $v) {
+	            	if($k == 'dt_created') {
+	            		// don't update created date.
+	            		continue;
+	            	}
+	                $sql .= "`$k`=" . $db->quote($v) . ',';
+	            }
+	            $sql[strlen($sql) - 1] = ' ';
+	
+	            $sql .= "WHERE `{$this->idColumnName}` = " . $db->quote($this->id);
+	            $db->query($sql);
+	
+	            return $db->affectedRows();
+	        }
+    	
+    	
+    	function sendConfirmationMail() {
+    		// TODO
+    		$downloadScriptName = 'download-confirm.php?id=' . $this->id . '&customerEmail=' . urlencode($this->customerEmail) . '&app_id=' . $this->app_id;
+    		
+    		// TODO
+    		$downloadLink = 'http://'.$_SERVER['HTTP_HOST'] . WEB_ROOT . '/' . $downloadScriptName;
+
+			$app = new Application($this->app_id);
+			if(!$app->ok()) {
+				die('Invalid app ID: ' . $this->app_id);
+			}
+    		$body 	 = "Hello {$this->customer_name}\n\n";
+    		$body	.= "You have requested to download {$app->name}. Please click on the link below to download the application:\n\n";
+    		$body	.= "\t{$downloadLink}\n\n";
+    		$body	.= "If your e-mail program does not display the above text as a link, please copy the line above and paste it in your web browser.\n\n";
+    		$body	.= "Thank you for your interest in {$app->name}.";
+    		
+    		
+    		/*
+    					// Create a random boundary
+    					$boundary = base64_encode(md5(rand()));
+    		
+    					$headers  = "From: {$app->from_email}\n";
+    					$headers .= "X-Mailer: PHP/" . phpversion() . "\n";
+    					$headers .= "MIME-Version: 1.0\n";
+    					$headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\n";
+    					$headers .= "Content-Transfer-Encoding: 7bit\n\n";
+    					$headers .= "This is a MIME encoded message.\n\n";
+    		
+    					$headers .= "--$boundary\n";
+    		
+    					$headers .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+    					$headers .= "Content-Transfer-Encoding: 7bit\n\n";
+    					$headers .= $app->getBody($this) . "\n\n\n";
+    		
+    					$headers .= "--$boundary\n";
+    		
+    					$headers .= "Content-Type: application/octet-stream; name=\"{$app->license_filename}\"\n";
+    					$headers .= "Content-Transfer-Encoding: base64\n";
+    					$headers .= "Content-Disposition: attachment\n\n";
+    		
+    				    $headers .= chunk_split(base64_encode($this->license))."\n";
+    		
+    				    $headers .= "--$boundary--";
+    		
+    		*/
+    		
+			// Create a random boundary
+			$boundary = base64_encode(md5(rand()));
+
+			$headers  = "From: {$app->from_email}\n";
+			$headers .= "X-Mailer: PHP/" . phpversion() . "\n";
+			$headers .= "MIME-Version: 1.0\n";
+			$headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\n";
+			$headers .= "Content-Transfer-Encoding: 7bit\n\n";
+			$headers .= "This is a MIME encoded message.\n\n";
+
+			$headers .= "--$boundary\n";
+
+			$headers .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+			$headers .= "Content-Transfer-Encoding: 7bit\n\n";
+			$headers .= $body . "\n";
+
+		    $headers .= "--$boundary--";
+    		
+
+		    
+		    return mail($this->customerEmail, $app->name . ' download link','', utf8_encode($headers));
+    		
+    	}
+    }
+    // END adib 5-Jun-2010 10:13 

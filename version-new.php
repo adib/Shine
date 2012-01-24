@@ -23,14 +23,18 @@
 			$v->downloads      = 0;
 			$v->filesize       = filesize($_FILES['file']['tmp_name']);
 			$v->signature      = sign_file($_FILES['file']['tmp_name'], $app->sparkle_pkey);
+			$v->status         = !empty($_POST['version_status']) ? $_POST['version_status'] : VERSION_STATUS_PRODUCTION;
 			
-			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . substr($_FILES['file']['name'], -3);
-			$v->url = slash($app->s3path) . $object;
-			$info   = parse_url($app->s3path);
-			$object = slash($info['path']) . $object;
+			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+			$v->url = $object;
 			chmod($_FILES['file']['tmp_name'], 0755);
-			$s3 = new S3($app->s3key, $app->s3pkey);
-			$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+			
+			LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
+			
+			# Amazon S3 file upload
+//			$s3 = new S3($app->s3key, $app->s3pkey);
+//			$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+			
 			$v->insert();
 
 			redirect('versions.php?id=' . $app->id);
@@ -87,6 +91,13 @@
                         </div>
                         <div class="bd">
 							<form action="version-new.php?id=<?PHP echo $app->id; ?>" method="post" enctype="multipart/form-data">
+								<p><label for="version_status">Version Status</label>
+									<select name="version_status" id="version_status">
+										<option value="<?php echo VERSION_STATUS_PRODUCTION; ?>"> Production
+										<option value="<?php echo VERSION_STATUS_BETA; ?>"> Beta
+										<option value="<?php echo VERSION_STATUS_TEST; ?>"> Test
+									</select>
+								</p>
 								<p><label for="version_number">Sparkle Version Number</label> <input type="text" name="version_number" id="version_number" value="<?PHP echo $version_number;?>" class="text"></p>
 								<p><label for="human_version">Human Readable Version Number</label> <input type="text" name="human_version" id="human_version" value="<?PHP echo $human_version;?>" class="text"></p>
 								<p><label for="release_notes">Release Notes</label> <textarea class="text" name="release_notes" id="release_notes"><?PHP echo $release_notes; ?></textarea></p>

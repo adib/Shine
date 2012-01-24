@@ -32,6 +32,7 @@
 										<th>Release Date</th>
 										<th>Downloads</th>
 										<th>Updates</th>
+										<th>Status</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -42,6 +43,9 @@
 										<td><?PHP echo dater($v->dt, 'n/d/Y g:ia'); ?></td>
 										<td><?PHP echo number_format($v->downloads); ?></td>
 										<td><?PHP echo number_format($v->updates); ?></td>
+										<td><span style="color: darkred;">
+											<?PHP echo $v->status == VERSION_STATUS_PRODUCTION ? 'production' : ($v->status == VERSION_STATUS_BETA ? 'beta' : 'test'); ?>
+										</span></td>
 									</tr>
 									<?PHP endforeach; ?>
 								</tbody>

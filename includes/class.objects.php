@@ -50,26 +50,26 @@
 		public function strCurrentVersion()
 		{
 			$db = Database::getDatabase();
-			return $db->getValue("SELECT version_number FROM shine_versions WHERE app_id = '{$this->id}' ORDER BY dt DESC LIMIT 1");
+			return $db->getValue("SELECT version_number FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION." ORDER BY dt DESC LIMIT 1");
 		}
 		
 		public function strLastReleaseDate()
 		{
 			$db = Database::getDatabase();
-			$dt = $db->getValue("SELECT dt FROM shine_versions WHERE app_id = '{$this->id}' ORDER BY dt DESC LIMIT 1");
+			$dt = $db->getValue("SELECT dt FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION." ORDER BY dt DESC LIMIT 1");
 			return time2str($dt);
 		}
 		
         public function totalDownloads()
         {
             $db = Database::getDatabase();
-            return $db->getValue("SELECT SUM(downloads) FROM shine_versions WHERE app_id = '{$this->id}'");
+            return $db->getValue("SELECT SUM(downloads) FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION);
         }
 
         public function totalUpdates()
         {
             $db = Database::getDatabase();
-            return $db->getValue("SELECT SUM(updates) FROM shine_versions WHERE app_id = '{$this->id}'");
+            return $db->getValue("SELECT SUM(updates) FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION);
         }
 
 		public function numSupportQuestions()
@@ -286,7 +286,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_versions', array('app_id', 'human_version', 'version_number', 'dt', 'release_notes', 'filesize', 'url', 'downloads', 'updates', 'signature'), $id);
+            parent::__construct('shine_versions', array('app_id', 'human_version', 'version_number', 'dt', 'release_notes', 'filesize', 'url', 'downloads', 'updates', 'signature', 'status'), $id);
         }
     }
 

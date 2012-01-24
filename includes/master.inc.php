@@ -1,5 +1,7 @@
 <?PHP
-	date_default_timezone_set('America/Chicago');
+# atomic: don't change timezone
+//	date_default_timezone_set('America/Chicago');
+
 
     // Application flag
     define('SPF', true);

@@ -16,11 +16,11 @@
         $app_id = 1;
     }
 	
-	$v = DBObject::glob('Version', "SELECT * FROM shine_versions WHERE app_id = $app_id ORDER BY dt DESC LIMIT 1");
+	$v = DBObject::glob('Version', "SELECT * FROM shine_versions WHERE app_id = $app_id AND status = ".VERSION_STATUS_PRODUCTION." ORDER BY dt DESC LIMIT 1");
 	$v = array_pop($v);
 	$v->downloads++;
 	$v->update();
 
 	Download::track();
 	
-	header('Location: ' . $v->url);
+	header('Location: dl/' . $v->url);

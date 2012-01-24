@@ -11,6 +11,7 @@
 	
 	if(isset($_POST['btnDelete']))
 	{
+		LocalUpload::deleteFile($v->url);
 		$v->delete();
 		redirect('versions.php?id=' . $app->id);
 	}
@@ -23,6 +24,7 @@
 		$v->release_notes  = $_POST['release_notes'];
 		$v->filesize = $_POST['filesize'];
 		$v->signature = $_POST['signature'];
+		$v->status = $_POST['version_status'];
 		$v->update();	
 	}
 
@@ -32,6 +34,7 @@
 	$url            = $v->url;
 	$signature      = $v->signature;
 	$filesize       = $v->filesize;	
+	$status		= $v->status;
 ?>
 <?PHP include('inc/header.inc.php'); ?>
 
@@ -52,6 +55,13 @@
                         </div>
                         <div class="bd">
 							<form action="version-edit.php?id=<?PHP echo $v->id; ?>" method="post">
+								<p><label for="version_status">Version Status</label>
+									<select name="version_status" id="version_status">
+										<option value="<?php echo VERSION_STATUS_PRODUCTION; ?>" <?php if ($status == VERSION_STATUS_PRODUCTION) echo 'selected="selected"';?>> Production
+										<option value="<?php echo VERSION_STATUS_BETA; ?>" <?php if ($status == VERSION_STATUS_BETA) echo 'selected="selected"';?>> Beta
+										<option value="<?php echo VERSION_STATUS_TEST; ?>" <?php if ($status == VERSION_STATUS_TEST) echo 'selected="selected"';?>> Test
+									</select>
+								</p>
 								<p><label for="version_number">Version Number</label> <input type="text" name="version_number" id="version_number" value="<?PHP echo $version_number;?>" class="text"></p>
 								<p><label for="human_version">Human Readable Version Number</label> <input type="text" name="human_version" id="human_version" value="<?PHP echo $human_version;?>" class="text"></p>
 								<p><label for="url">Download URL</label> <input type="text" name="url" id="url" value="<?PHP echo $url;?>" class="text"></p>

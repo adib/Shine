@@ -39,14 +39,15 @@ function makeGoogleChart($result, $div_id, $title, $width = null, $height = null
 
 
 $url = array(
-	'id' => getParams($_GET, 'id', 'int', 0)
+	'id' => getParams($_GET, 'id', 'int', 0),
+	'from_date' => getParams($_GET, 'from_date', 'str', '', true)
 );
 
 $db = Database::getDatabase();
 $applications = DBObject::glob('Application', 'SELECT * FROM shine_applications ORDER BY name');
 
 if (!isset($_GET['tables'])) {
-	$from_date = getParams($_GET, 'from_date', 'str', '', true);
+	$from_date = $url['from_date'];
 	if (($from_time = strtotime($from_date)) == false) $from_time = mktime(0, 0, 0, date("m")-1, date("d"), date("Y"));
 	$from_date = date('Y-m-d 00:00:00', $from_time);
 	
@@ -189,6 +190,7 @@ else {
 							<?PHP endfor; ?>
 							<li><a href="<?PHP echo $nav.'.php?'.http_build_query(array_merge($url, array('page' => $pager->nextPage()))); ?>">Next &#187;</a></li>
 						</ul>
+						<h2 style="text-align: right;">Total: <?php echo $count.' purchases</h2>'; ?>
 					<?php }
 					######################################################## GRAPHIC VIEW ########################################################
 					else {

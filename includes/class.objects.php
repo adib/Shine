@@ -31,7 +31,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_applications', array('name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 'sparkle_key', 'sparkle_pkey', 'ap_key', 'ap_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_security_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name'), $id);
+            parent::__construct('shine_applications', array('name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 'sparkle_key', 'sparkle_pkey', 'ap_key', 'ap_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_security_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name', 'bundle_id'), $id);
         }
 
 		public function engine()
@@ -171,6 +171,46 @@
 			else
 				return "<a href='tickets-milestone.php?id={$m->id}'>{$m->title}</a>";
 		}
+    }
+
+    class Inapp extends DBObject
+    {
+        public function __construct()
+        {
+            parent::__construct('shine_inapp', array('trx_id', 'app_id', 'inapp_id', 'trx_date', 'bundle_version', 'price', 'currency', 'uuid', 'ip', 'country'));
+            $this->idColumnName = 'trx_id';
+        }
+        
+        public function insert($cmd = 'INSERT INTO')
+        {
+            $db = Database::getDatabase();
+
+            $data = array();
+            foreach($this->columns as $k => $v)
+                if(!is_null($v))
+                    $data[$k] = $db->quote($v);
+
+            $columns = '`' . implode('`, `', array_keys($data)) . '`';
+            $values = implode(',', $data);
+            
+            $this->id = $data['trx_id'];
+
+            return $db->query("$cmd `{$this->tableName}` ($columns) VALUES ($values)", null, false, false);
+        }
+
+	public function applicationName()
+	{
+		static $cache;
+		if(!is_array($cache)) $cache = array();
+
+		if(!isset($cache[$this->app_id]))
+		{
+			$app = new Application($this->app_id);
+			$cache[$this->app_id] = $app->name;
+		}
+		
+		return $cache[$this->app_id];
+	}
     }
 
     class Activation extends DBObject

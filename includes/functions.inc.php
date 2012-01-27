@@ -807,3 +807,53 @@
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
         return isset($mime_types[$ext]) ? $mime_types[$ext] : $default;
     }
+
+function getParams($envs, $varname, $type = null, $default = false, $escape_strings = false) {
+	$var = !empty($envs[$varname]) ? $envs[$varname] : false;
+
+	if(!empty($type)) {
+		switch($type) {
+			case 'int': if(is_array($var)) {
+					foreach($var as $k => $v) {
+				    		$var[$k] = (int)$v;
+				    	}
+					
+				    } else {
+				    	$var = (int)$var; 
+				    };
+				    break;
+			case 'str': if(is_array($var)) {
+					foreach($var as $k => $v) {
+				    		$var[$k] = trim(strval($v));
+				    		if ($escape_strings) $var[$k] = mysql_escape_string($var[$k]);
+				    	}
+					
+				    } else {
+				    	$var = trim(strval($var)); 
+				    	if ($escape_strings) $var = mysql_escape_string($var);
+				    };
+				    break;
+			case 'bool': if(is_array($var)) {
+					foreach($var as $k => $v) {
+				    		$var[$k] = (bool)($v);
+				    	}
+					
+				    } else {
+				    	$var = (bool)$var;
+				    };
+				     break;
+			case 'float': if(is_array($var)) {
+					foreach($var as $k => $v) {
+				    		$var[$k] = (float)($v);
+				    	}
+					
+				    } else {
+				    	$var = (float)$var;
+				    };    
+				     break;
+			default: break;
+		}
+	}
+	if(empty($var)) $var = $default;
+	return $var;
+}

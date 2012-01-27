@@ -15,6 +15,7 @@
         <li<?PHP if($nav == 'tickets') : ?> class="active"<?PHP endif; ?>><a href="tickets.php">Tickets</a></li>
         <li<?PHP if($nav == 'tweets') : ?> class="active"<?PHP endif; ?>><a href="tweets.php">Tweets (<?PHP echo $tweet_count; ?>)</a></li>
         <li<?PHP if($nav == 'stats') : ?> class="active"<?PHP endif; ?>><a href="stats.php">Sparkle Stats</a></li>
+        <li<?PHP if($nav == 'inapp-stats') : ?> class="active"<?PHP endif; ?>><a href="inapp-stats.php">In-App Stats (<span style="color: GreenYellow;">New!</span>)</a></li>
     </ul>
 
     <ul id="user-navigation">

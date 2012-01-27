@@ -16,6 +16,7 @@
 			$app->name              = $_POST['name'];
 			$app->link              = $_POST['link'];
 			$app->bundle_name       = $_POST['bundle_name'];
+			$app->bundle_id         = $_POST['bundle_id'];
 			$app->i_use_this_key    = $_POST['i_use_this_key'];
 			$app->s3key             = $_POST['s3key'];
 			$app->s3pkey            = $_POST['s3pkey'];
@@ -43,6 +44,7 @@
 			$name              = $_POST['name'];
 			$link              = $_POST['link'];
 			$bundle_name       = $_POST['bundle_name'];
+			$bundle_id         = $_POST['bundle_id'];
 			$i_use_this_key    = $_POST['i_use_this_key'];
 			$s3key             = $_POST['s3key'];
 			$s3pkey            = $_POST['s3pkey'];
@@ -69,6 +71,7 @@
 		$name              = $app->name;
 		$link              = $app->link;
 		$bundle_name       = $app->bundle_name;
+		$bundle_id         = $app->bundle_id;
 		$i_use_this_key    = $app->i_use_this_key;
 		$s3key             = $app->s3key;
 		$s3pkey            = $app->s3pkey;
@@ -138,6 +141,11 @@
                                     <label for="url">Bundle Name</label>
                                     <input type="text" class="text" name="bundle_name" id="bundle_name" value="<?PHP echo $bundle_name; ?>">
                                     <span class="info">Ex: MyApplication.app</span>
+                                </p>
+                                <p>
+                                    <label for="url">MacAppstore Bundle Id</label>
+                                    <input type="text" class="text" name="bundle_id" id="bundle_id" value="<?PHP echo $bundle_id; ?>">
+                                    <span class="info">Get from MacAppstore</span>
                                 </p>
                                 <p>
                                     <label for="url">i use this URL Key Slug</label>

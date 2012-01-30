@@ -118,7 +118,7 @@ else {
 
 <div id="bd">
 	<div id="yui-main">
-		<div class="yui-b"><div class="yui-g">
+		<div class="yui-b" style="margin-right: 1%!important; min-width: 870px!important;"><div class="yui-g">
 			<div class="block tabs"><div class="hd">
 				<ul>
 					<li class="<?PHP if(!isset($url['tables'])) echo 'active'; ?>"><a href="<?php echo $nav.'.php';?>">Graphics</a></li>
@@ -175,7 +175,7 @@ else {
 									<td><?PHP echo $s->uuid; ?></td>
 									<td><?PHP echo $s->ip; ?></td>
 									<td><?PHP echo !empty($s->country) ? $s->country : '-'; ?></td>
-									<td><?PHP echo $s->trx_date; ?></td>
+									<td><?PHP echo date('m/d/Y h:ia', strtotime($s->trx_date)); ?></td>
 									<td><a href=""></a></td>
 								</tr>
 							<?PHP endforeach; ?>

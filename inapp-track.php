@@ -7,7 +7,7 @@ $res = 'ERR';
 $bundle_id = getParams($_REQUEST, 'bundleid', 'str');
 $data['trx_id'] = getParams($_REQUEST, 'trxid', 'str');
 $data['inapp_id'] = getParams($_REQUEST, 'inappid', 'str');
-$data['trx_date'] = getParams($_REQUEST, 'trxdate', 'str');
+$data['trx_date'] = getParams($_REQUEST, 'trxdate', 'str'); # in unix timestamp
 $data['bundle_version'] = getParams($_REQUEST, 'bundleversion', 'str');
 $data['price'] = getParams($_REQUEST, 'price', 'str');
 $data['currency'] = getParams($_REQUEST, 'currency', 'str');
@@ -27,7 +27,7 @@ if (!empty($bundle_id) && !empty($data['trx_id']) && !empty($data['inapp_id']) &
 			$inapp->trx_id = $data['trx_id'];
 			$inapp->app_id = $app->id;
 			$inapp->inapp_id = $data['inapp_id'];
-			$inapp->trx_date = $data['trx_date'];
+			$inapp->trx_date = date('Y-m-d H:i:s', (int)$data['trx_date']);
 			$inapp->bundle_version = $data['bundle_version'];
 			$inapp->price = $data['price'];
 			$inapp->currency = $data['currency'];

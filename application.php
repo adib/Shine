@@ -26,6 +26,8 @@
 			$app->sparkle_pkey      = $_POST['sparkle_pkey'];
 			$app->ap_key            = $_POST['ap_key'];
 			$app->ap_pkey           = $_POST['ap_pkey'];
+			$app->cf_key            = $_POST['cf_key'];
+			$app->cf_pkey           = $_POST['cf_pkey'];
 			$app->custom_salt       = $_POST['custom_salt'];
 			$app->from_email        = $_POST['from_email'];
 			$app->email_subject     = $_POST['email_subject'];
@@ -54,6 +56,8 @@
 			$sparkle_pkey      = $_POST['sparkle_pkey'];
 			$ap_key            = $_POST['ap_key'];
 			$ap_pkey           = $_POST['ap_pkey'];
+			$cf_key            = $_POST['cf_key'];
+			$cf_pkey           = $_POST['cf_pkey'];
 			$custom_salt       = $_POST['custom_salt'];
 			$from_email        = $_POST['from_email'];
 			$email_subject     = $_POST['email_subject'];
@@ -81,6 +85,8 @@
 		$sparkle_pkey      = $app->sparkle_pkey;
 		$ap_key            = $app->ap_key;
 		$ap_pkey           = $app->ap_pkey;
+		$cf_key            = $app->cf_key;
+		$cf_pkey           = $app->cf_pkey;
 		$custom_salt       = $app->custom_salt;
 		$from_email        = $app->from_email;
 		$email_subject     = $app->email_subject;
@@ -218,6 +224,16 @@
                                 <p>
 									<label for="ap_pkey">Aquatic Prime Private Key</label>
                                     <textarea name="ap_pkey" id="ap_pkey" class="text"><?PHP echo $ap_pkey ?></textarea>
+                                </p>
+
+
+                                <p>
+									<label for="cf_key">CocoaFob DSA Public Key</label>
+                                    <textarea name="cf_key" id="cf_key" class="text"><?PHP echo $cf_key ?></textarea>
+                                </p>
+                                <p>
+									<label for="cf_pkey">CocoaFob DSA Private Key</label>
+                                    <textarea name="cf_pkey" id="cf_pkey" class="text"><?PHP echo $cf_pkey ?></textarea>
                                 </p>
 
 								<p>

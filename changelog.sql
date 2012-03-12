@@ -26,3 +26,10 @@ CREATE TABLE `shine_inapp` (
   `country` varchar(50) NOT NULL,
   PRIMARY KEY (`trx_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+-- 2012.03.12
+
+ALTER TABLE `shine_applications`
+ADD COLUMN `cf_key` TEXT NOT NULL AFTER ap_pkey,
+ADD COLUMN `cf_pkey` TEXT NOT NULL AFTER cf_key;

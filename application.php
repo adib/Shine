@@ -24,6 +24,8 @@
 			$app->s3path            = $_POST['s3path'];
 			$app->sparkle_key       = $_POST['sparkle_key'];
 			$app->sparkle_pkey      = $_POST['sparkle_pkey'];
+			$app->activation_online = $_POST['activation_online'];
+			$app->activation_online_class = $_POST['activation_online_class'];
 			$app->ap_key            = $_POST['ap_key'];
 			$app->ap_pkey           = $_POST['ap_pkey'];
 			$app->cf_key            = $_POST['cf_key'];
@@ -34,6 +36,7 @@
 			$app->email_body        = $_POST['email_body'];
 			$app->license_filename  = $_POST['license_filename'];
 			$app->return_url        = $_POST['return_url'];
+			$app->fs_license_key    = $_POST['fs_license_key'];
 			$app->fs_security_key   = $_POST['fs_security_key'];
 			$app->tweet_terms       = $_POST['tweet_terms'];
 			$app->upgrade_app_id    = $_POST['upgrade_app_id'];
@@ -54,6 +57,8 @@
 			$s3path            = $_POST['s3path'];
 			$sparkle_key       = $_POST['sparkle_key'];
 			$sparkle_pkey      = $_POST['sparkle_pkey'];
+			$activation_online = $_POST['activation_online'];
+			$activation_online_class = $_POST['activation_online_class'];
 			$ap_key            = $_POST['ap_key'];
 			$ap_pkey           = $_POST['ap_pkey'];
 			$cf_key            = $_POST['cf_key'];
@@ -64,6 +69,7 @@
 			$email_body        = $_POST['email_body'];
 			$license_filename  = $_POST['license_filename'];
 			$return_url        = $_POST['return_url'];
+			$fs_license_key    = $_POST['fs_license_key'];
 			$fs_security_key   = $_POST['fs_security_key'];
 			$tweet_terms       = $_POST['tweet_terms'];
 			$upgrade_app_id    = $_POST['upgrade_app_id'];
@@ -83,6 +89,8 @@
 		$s3path            = $app->s3path;
 		$sparkle_key       = $app->sparkle_key;
 		$sparkle_pkey      = $app->sparkle_pkey;
+		$activation_online = $app->activation_online;
+		$activation_online_class = $app->activation_online_class;
 		$ap_key            = $app->ap_key;
 		$ap_pkey           = $app->ap_pkey;
 		$cf_key            = $app->cf_key;
@@ -93,6 +101,7 @@
 		$email_body        = $app->email_body;
 		$license_filename  = $app->license_filename;
 		$return_url        = $app->return_url;
+		$fs_license_key    = $app->fs_license_key;
 		$fs_security_key   = $app->fs_security_key;
 		$tweet_terms       = $app->tweet_terms;
 		$upgrade_app_id    = $app->upgrade_app_id;
@@ -113,6 +122,18 @@
 		} 
 	}
 	$available_engines = implode(', ', $available_engines);
+	
+	
+	$available_online_engines = array();
+	foreach($files as $fn)
+	{
+		$engine_name = match('/^class\.engineonline(..*?)\.php/', $fn, 1);
+		if($engine_name !== false)
+		{
+			$available_online_engines[] = $engine_name;
+		} 
+	}
+	$available_online_engines = implode(', ', $available_online_engines);
 ?>
 <?PHP include('inc/header.inc.php'); ?>
 
@@ -212,6 +233,21 @@
 
 								<h3>Licensing Engine</h3>
 								<p>
+									<input type="checkbox" name="activation_online" id="activation_online" value="1" <?PHP echo $activation_online == 1 ? 'checked="checked"' : ''; ?>>
+									<label for="engine_class_name">Use online activations</label>
+									<span class="info">If checked, activation will result in generating activation key. 
+										This key will be given to the user, who should enter it in the application itself. 
+										The application then should make online-activation request, which will 
+										return generated license for an activation key.</span>
+								</p>
+								
+								<p>
+									<label for="engine_class_name">Online Activations Key Generation Class Name</label><br>
+                                    					<input type="text" class="text" name="activation_online_class" id="activation_online_class" value="<?PHP echo $activation_online_class; ?>">
+									<span class="info">The PHP class name of online activations key generation engine. Available engines are: <?PHP echo $available_online_engines; ?></span>
+                                </p>
+								
+								<p>
 									<label for="engine_class_name">License Engine Class Name</label><br>
                                     <input type="text" class="text" name="engine_class_name" id="engine_class_name" value="<?PHP echo $engine_class_name; ?>">
 									<span class="info">The PHP class name of your licensing engine. Available engines are: <?PHP echo $available_engines; ?></span>
@@ -252,6 +288,10 @@
                                 <hr>
 
                                 <h3>FastSpring</h3>
+                                <p>
+                                    <label for="return_url">License Request (Fulfillment) Security Key</label>
+                                    <input type="text" class="text" name="fs_license_key" value="<?PHP echo $fs_license_key; ?>" id="fs_license_key">
+                                </p>  
                                 <p>
                                     <label for="return_url">Item Notification Security Key</label>
                                     <input type="text" class="text" name="fs_security_key" value="<?PHP echo $fs_security_key; ?>" id="fs_security_key">

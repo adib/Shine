@@ -1,32 +1,88 @@
-<?PHP
-	require 'includes/master.inc.php';
-	
-	$post = trim(file_get_contents('php://input'));
-	$post = base64_decode($post);
-	$dict = json_decode($post);
+<?php
+require 'includes/master.inc.php';
 
-	$a = new Activation();
-	$a->app_id        = $dict->app_id;
-	$a->name          = $dict->email;
-	$a->serial_number = $dict->serial;
-	$a->dt            = dater();
-	$a->ip            = $_SERVER['REMOTE_ADDR'];
-	$a->insert();
+$response = array(
+	'result' => false,
+	'errorCode' => 1,
+	'errorMessage' => 'Incorrect request data'
+);
 
-	$app = new Application($a->app_id);
-	if(!$app->ok()) die('serial');
+if (!empty($_POST['data']) && !empty($_POST['app_id'])) {
+	$app = new Application($_POST['app_id']);
+	if ($app->ok()) {
+		$data = explode('|', base64_decode($_POST['data']));
+		if (!empty($data) && count($data) == 3) {
+			$serial = $data[0];
+			$hwid = $data[1];
+			
+			$a = new Activation();
+			$params = array(
+				'serial_number' => $serial,
+				'app_id' => $app->id
+			);
+			$a->selectMultiple($params);
+			
+			# If not found
+			if (!$a->ok()) {
+				# FIXME: check activations count
+				
+				$a = new Activation();
+				$a->app_id = $app->id;
+				$a->hwid = $hwid;
+				$a->serial_number = $serial;
+				$a->dt = dater();
+				$a->ip = $_SERVER['REMOTE_ADDR'];
+				$a->insert();
+			}
+			
+			# FIXME: generate license and respond
+			$license = $a->generateLicense();
+			
+			$response = array(
+				'result' => true,
+				'licence' => base64_encode($license)
+			);
+		}
+		else {
+			$response['errorCode'] = 3;
+			$response['errorMessage'] = 'Incorrect data';
+		}
+	}
+	else {
+		$response['errorCode'] = 2;
+		$response['errorMessage'] = 'Application not found';
+	}
+}
 
-	$o = new Order();
-	$o->select($a->serial_number, 'serial_number');
-	if(!$o->ok()) die('serial');
-	
-	// Because we die before the activation is updated with the found order id,
-	// this has the added benefit of highlighting the activation as "fraudulent"
-	// in the activations list. It's not fraudulent obviously, but it does let
-	// us quickly see if deactivated licenses are still being used.
-	if($o->deactivated == 1) die('serial');
+echo json_encode($response);
 
-	$a->order_id = $o->id;
-	$a->update();
+/*
+$post = trim(file_get_contents('php://input'));
+$post = base64_decode($post);
+$dict = json_decode($post);
 
-	$o->downloadLicense();
+$a = new Activation();
+$a->app_id        = $dict->app_id;
+$a->name          = $dict->email;
+$a->serial_number = $dict->serial;
+$a->dt            = dater();
+$a->ip            = $_SERVER['REMOTE_ADDR'];
+$a->insert();
+
+$app = new Application($a->app_id);
+if(!$app->ok()) die('serial');
+
+$o = new Order();
+$o->select($a->serial_number, 'serial_number');
+if(!$o->ok()) die('serial');
+
+// Because we die before the activation is updated with the found order id,
+// this has the added benefit of highlighting the activation as "fraudulent"
+// in the activations list. It's not fraudulent obviously, but it does let
+// us quickly see if deactivated licenses are still being used.
+if($o->deactivated == 1) die('serial');
+
+$a->order_id = $o->id;
+$a->update();
+
+$o->downloadLicense();

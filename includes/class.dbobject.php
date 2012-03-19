@@ -65,6 +65,28 @@
             return false;
         }
 
+        public function selectMultiple($params)
+        {
+            if (!empty($params)) {
+	            $db = Database::getDatabase();
+	
+	            $where = array();
+	            foreach ($params as $col => $val) {
+	                $where[] = "`".$db->escape($col)."` = '".$db->escape($val)."'";
+	            }
+	
+	            $db->query("SELECT * FROM `{$this->tableName}` WHERE ".implode(' AND ', $where))." LIMIT 1";
+	            if($db->hasRows())
+	            {
+	                $row = $db->getRow();
+	                $this->load($row);
+	                return true;
+	            }
+            }
+
+            return false;
+        }
+
         public function ok()
         {
             return !is_null($this->id);

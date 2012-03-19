@@ -31,7 +31,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_applications', array('name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 'sparkle_key', 'sparkle_pkey', 'ap_key', 'ap_pkey', 'cf_key', 'cf_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_security_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name', 'bundle_id'), $id);
+            parent::__construct('shine_applications', array('name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 'sparkle_key', 'sparkle_pkey', 'activation_online', 'activation_online_class', 'ap_key', 'ap_pkey', 'cf_key', 'cf_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_license_key', 'fs_security_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name', 'bundle_id'), $id);
         }
 
 		public function engine()
@@ -40,6 +40,14 @@
 			$engine = new $class_name();
 			$engine->application = $this;
 			return $engine;
+		}
+
+		public function engine_online()
+		{
+			$class_name = 'Engine' . $this->activtion_online_class;
+			$engine_online = new $class_name();
+			$engine_online->application = $this;
+			return $engine_online;
 		}
 
 		public function versions()
@@ -268,6 +276,14 @@
 			$engine = $app->engine();
 			$engine->order = $this;
 			$engine->generateLicense();
+		}
+
+		public function generateSerial()
+		{
+			$app = new Application($this->app_id);
+			$engine_online = $app->engine_online();
+			$engine_online->order = $this;
+			$engine_online->generateSerial();
 		}
 
 		public function emailLicense()

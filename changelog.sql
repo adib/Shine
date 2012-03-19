@@ -33,3 +33,11 @@ CREATE TABLE `shine_inapp` (
 ALTER TABLE `shine_applications`
 ADD COLUMN `cf_key` TEXT NOT NULL AFTER ap_pkey,
 ADD COLUMN `cf_pkey` TEXT NOT NULL AFTER cf_key;
+
+
+-- 2012.03.16
+
+ALTER TABLE `shine_applications`
+ADD COLUMN `activation_online` TINYINT(1) NOT NULL DEFAULT 0 AFTER sparkle_pkey,
+ADD COLUMN `activation_online_class` VARCHAR(128) NOT NULL DEFAULT 'default' AFTER activation_online,
+ADD COLUMN `fs_license_key` VARCHAR(45) NOT NULL DEFAULT '' AFTER return_url;

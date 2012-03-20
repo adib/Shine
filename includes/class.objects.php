@@ -44,7 +44,7 @@
 
 		public function engine_online()
 		{
-			$class_name = 'Engine' . $this->activtion_online_class;
+			$class_name = 'EngineOnline' . $this->activation_online_class;
 			$engine_online = new $class_name();
 			$engine_online->application = $this;
 			return $engine_online;
@@ -225,7 +225,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_activations', array('app_id', 'name', 'serial_number', 'guid', 'dt', 'ip', 'order_id'), $id);
+            parent::__construct('shine_activations', array('app_id', 'name', 'serial_number', 'hwid', 'guid', 'dt', 'ip', 'order_id'), $id);
         }
 
 		public function applicationName()
@@ -240,6 +240,14 @@
 			}
 			
 			return $cache[$this->app_id];
+		}
+
+		public function generateLicenseOnline($hwid)
+		{
+			$app = new Application($this->app_id);
+			$engine = $app->engine();
+			$engine->order = $this;
+			return $engine->generateLicenseOnline($hwid);
 		}
 	}
 
@@ -283,7 +291,18 @@
 			$app = new Application($this->app_id);
 			$engine_online = $app->engine_online();
 			$engine_online->order = $this;
-			$engine_online->generateSerial();
+			
+			do {
+				$this->serial_number = $engine_online->generateSerial();
+				
+				# In case we find order with the same serial (almost impossible, but...)
+				$search_o = new self();
+				$params = array(
+					'app_id' => $this->app_id,
+					'serial_number' => $this->serial_number
+				);
+				$search_o->selectMultiple($params);
+			} while ($search_o->ok());
 		}
 
 		public function emailLicense()

@@ -21,15 +21,17 @@ if (md5($check_data . $app->fs_license_key) != $_REQUEST['security_request_hash'
 
 # Insert Order
 $o = new Order();
+$o->app_id = $app->id;
 $o->txn_id = $_POST['reference'];
 $o->payer_email = $_POST['email'];
 $o->quantity = $_POST['quantity'];
-$o->serial_number = $o->generateSerial();
+$o->dt = dater();
+$o->type = 'FastSpring';
+$o->generateSerial(); # generates serial into $o->serial_number
 
 # Getting name
-$name = $_POST['name'];
-if (!empty($name)) {
-	$name = explode(' ', $name, 2);
+if (!empty($_POST['name'])) {
+	$name = explode(' ', $_POST['name'], 2);
 	if (!empty($name[1])) {
 		$o->first_name = $name[0];
 		$o->last_name = $name[1];
@@ -37,9 +39,6 @@ if (!empty($name)) {
 	else $o->last_name = $name[0];
 }
 
-$o->app_id = $app->id;
-$o->dt = dater();
-$o->type = 'FastSpring';
 $id = $o->insert();
 
 # Return serial number

@@ -1,6 +1,22 @@
 <?PHP
 	class EngineCocoaFob extends Engine
 	{
+		# CocoaFob signature
+		public function generateLicenseSignature($dict) {
+			$stringData = implode(',', $dict);
+			$binary_signature ="";
+			openssl_sign($stringData, $binary_signature,$this->application->cf_pkey, OPENSSL_ALGO_DSS1);
+			// base 32 encode the signature
+			$encoded = base32_encode($binary_signature);
+			// replace O with 8 and I with 9
+			$replacement = str_replace("O", "8", str_replace("I", "9", $encoded));
+			//remove padding if any.
+			$padding = trim(str_replace("=", "", $replacement));
+			$dashed = rtrim(chunk_split($padding, 5,"-"));
+			
+			return substr($dashed, 0 , strlen($dashed) -1);
+		}
+		
 		public function generateLicense()
 		{
 			# Create our license dictionary to be signed - from AquaticPrime engine
@@ -13,32 +29,10 @@
 					"TransactionID" => $this->order->txn_id
 			);
 			
-			$stringData = implode(',', $dict);
-			#################################################
-			$binary_signature ="";
-			openssl_sign($stringData, $binary_signature,$this->application->cf_pkey, OPENSSL_ALGO_DSS1);
-			// base 32 encode the signature
-			$encoded = base32_encode($binary_signature);
-			// replace O with 8 and I with 9
-			$replacement = str_replace("O", "8", str_replace("I", "9", $encoded));
-			//remove padding if any.
-			$padding = trim(str_replace("=", "", $replacement));
-			$dashed = rtrim(chunk_split($padding, 5,"-"));
-			$sig = substr($dashed, 0 , strlen($dashed) -1);
+			$sig = $this->generateLicenseSignature($dict);
 			
 			# Convert signature string to plist licence file
-			$plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?".">\n";
-			$plist .= "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n";
-			$plist .= "<plist version=\"1.0\">\n<dict>\n";
-			foreach($dict as $key => $value) {
-				$value = utf8_encode($value);
-				$plist .= "\t<key>" . htmlspecialchars($key, ENT_NOQUOTES) . "</key>\n";
-				$plist .= "\t<string>" . htmlspecialchars($value, ENT_NOQUOTES) . "</string>\n";
-			}
-			$plist .= "\t<key>Signature</key>\n";
-			$plist .= "\t<data>$sig</data>\n";
-			$plist .= "</dict>\n";
-			$plist .= "</plist>\n";
+			$plist = static::generatePlist($dict, $sig);
 
 			$this->order->license = $plist;
 			$this->order->update();

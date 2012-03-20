@@ -7,8 +7,9 @@ $response = array(
 	'errorMessage' => 'Incorrect request data'
 );
 
-if (!empty($_POST['data']) && !empty($_POST['app_id'])) {
-	$app = new Application($_POST['app_id']);
+if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
+	$app = new Application();
+	$app->select($_POST['bundle_id'], 'bundle_id');
 	if ($app->ok()) {
 		$data = explode('|', base64_decode($_POST['data']));
 		if (!empty($data) && count($data) == 3) {
@@ -32,16 +33,30 @@ if (!empty($_POST['data']) && !empty($_POST['app_id'])) {
 				$a->serial_number = $serial;
 				$a->dt = dater();
 				$a->ip = $_SERVER['REMOTE_ADDR'];
-				$a->insert();
+				
+				$o = new Order();
+				$o->select($a->serial_number, 'serial_number');
+				
+				if ($o->ok()) {
+					$a->order_id = $o->id;
+					$a->insert();
+				}
+				else {
+					$a->id = null;
+					$response['errorCode'] = 4;
+					$response['errorMessage'] = 'Wrong serial number';
+				}
 			}
 			
-			# FIXME: generate license and respond
-			$license = $a->generateLicense();
-			
-			$response = array(
-				'result' => true,
-				'licence' => base64_encode($license)
-			);
+			if ($a->ok()) {
+				# Generate license and respond
+				$license = $a->generateLicenseOnline($a->hwid);
+				
+				$response = array(
+					'result' => true,
+					'licence' => base64_encode($license)
+				);
+			}
 		}
 		else {
 			$response['errorCode'] = 3;

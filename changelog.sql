@@ -41,3 +41,6 @@ ALTER TABLE `shine_applications`
 ADD COLUMN `activation_online` TINYINT(1) NOT NULL DEFAULT 0 AFTER sparkle_pkey,
 ADD COLUMN `activation_online_class` VARCHAR(128) NOT NULL DEFAULT 'default' AFTER activation_online,
 ADD COLUMN `fs_license_key` VARCHAR(45) NOT NULL DEFAULT '' AFTER return_url;
+
+ALTER TABLE `shine_activations`
+ADD COLUMN `hwid` VARCHAR(255) NOT NULL DEFAULT '' AFTER serial_number;

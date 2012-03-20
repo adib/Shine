@@ -5,7 +5,7 @@ class EngineCoppertino extends Engine {
 	public function generateLicenseSignature($dict) {
 		$values = implode('', $dict);
 		# uses CocoaFob private + public keys!
-		openssl_sign($values, $binary_signature,$this->application->cf_pkey, OPENSSL_ALGO_SHA1);
+		openssl_sign($values, $binary_signature,$this->application->rsa_pkey, OPENSSL_ALGO_SHA1);
 		
 		return base64_encode($binary_signature);
 	}

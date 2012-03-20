@@ -30,6 +30,8 @@
 			$app->ap_pkey           = $_POST['ap_pkey'];
 			$app->cf_key            = $_POST['cf_key'];
 			$app->cf_pkey           = $_POST['cf_pkey'];
+			$app->rsa_key           = $_POST['rsa_key'];
+			$app->rsa_pkey          = $_POST['rsa_pkey'];
 			$app->custom_salt       = $_POST['custom_salt'];
 			$app->from_email        = $_POST['from_email'];
 			$app->email_subject     = $_POST['email_subject'];
@@ -63,6 +65,8 @@
 			$ap_pkey           = $_POST['ap_pkey'];
 			$cf_key            = $_POST['cf_key'];
 			$cf_pkey           = $_POST['cf_pkey'];
+			$rsa_key           = $_POST['rsa_key'];
+			$rsa_pkey          = $_POST['rsa_pkey'];
 			$custom_salt       = $_POST['custom_salt'];
 			$from_email        = $_POST['from_email'];
 			$email_subject     = $_POST['email_subject'];
@@ -95,6 +99,8 @@
 		$ap_pkey           = $app->ap_pkey;
 		$cf_key            = $app->cf_key;
 		$cf_pkey           = $app->cf_pkey;
+		$rsa_key           = $app->rsa_key;
+		$rsa_pkey          = $app->rsa_pkey;
 		$custom_salt       = $app->custom_salt;
 		$from_email        = $app->from_email;
 		$email_subject     = $app->email_subject;
@@ -245,7 +251,18 @@
 									<label for="engine_class_name">Online Activations Key Generation Class Name</label><br>
                                     					<input type="text" class="text" name="activation_online_class" id="activation_online_class" value="<?PHP echo $activation_online_class; ?>">
 									<span class="info">The PHP class name of online activations key generation engine. Available engines are: <?PHP echo $available_online_engines; ?></span>
-                                </p>
+                                				</p>
+
+
+				                                <p>
+									<label for="rsa_key">RSA Public Key for online activations</label>
+				                                    <textarea name="rsa_key" id="rsa_key" class="text"><?PHP echo $rsa_key ?></textarea>
+				                                </p>
+				                                <p>
+									<label for="rsa_pkey">RSA Private Key for online activations</label>
+				                                    <textarea name="rsa_pkey" id="rsa_pkey" class="text"><?PHP echo $rsa_pkey ?></textarea>
+				                                </p>
+                                
 								
 								<p>
 									<label for="engine_class_name">License Engine Class Name</label><br>

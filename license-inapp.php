@@ -11,40 +11,54 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 	$app = new Application();
 	$app->select($_POST['bundle_id'], 'bundle_id');
 	if ($app->ok()) {
-		$data = explode('|', base64_decode($_POST['data']));
-		if (!empty($data) && count($data) == 3) {
-			$serial = $data[0];
-			$hwid = $data[1];
+		$data = $app->decodeRequestData($_POST['data']);
+		if (!empty($data) && !empty($data['activationCode']) && !empty($data['hardwareId'])) {
+			$serial = $data['activationCode'];
+			$hwid = $data['hardwareId'];
 			
 			$a = new Activation();
 			$params = array(
 				'serial_number' => $serial,
-				'app_id' => $app->id
+				'app_id' => $app->id,
+				'hwid' => $hwid
 			);
 			$a->selectMultiple($params);
 			
 			# If not found
 			if (!$a->ok()) {
-				# FIXME: check activations count
-				
-				$a = new Activation();
-				$a->app_id = $app->id;
-				$a->hwid = $hwid;
-				$a->serial_number = $serial;
-				$a->dt = dater();
-				$a->ip = $_SERVER['REMOTE_ADDR'];
-				
-				$o = new Order();
-				$o->select($a->serial_number, 'serial_number');
-				
-				if ($o->ok()) {
-					$a->order_id = $o->id;
-					$a->insert();
+				# Check activations count
+				$db = Database::getDatabase();
+				$sql = "SELECT o.id, o.quantity, COUNT(*) AS count
+					FROM shine_activations AS a 
+					LEFT JOIN shine_orders AS o ON o.id = a.order_id
+					WHERE o.app_id = ".((int)$app->id)." AND o.serial_number = '".$db->escape($serial)."'";
+				if ($db->query($sql) && $db->hasRows()) {
+					$row = $db->getRow();
+					if ($row['quantity'] > 0 && $row['quantity'] > $row['count']) {
+						$a = new Activation();
+						$a->app_id = $app->id;
+						$a->hwid = $hwid;
+						$a->serial_number = $serial;
+						$a->dt = dater();
+						$a->ip = $_SERVER['REMOTE_ADDR'];
+						$a->order_id = $row['id'];
+						$a->insert();
+					}
+					else if ($row['quantity'] <= 0) {
+						$a->id = null;
+						$response['errorCode'] = 6;
+						$response['errorMessage'] = 'Wrong serial number';
+					}
+					else {
+						$a->id = null;
+						$response['errorCode'] = 5;
+						$response['errorMessage'] = 'Maximum users for this serial number reached.';
+					}
 				}
 				else {
 					$a->id = null;
 					$response['errorCode'] = 4;
-					$response['errorMessage'] = 'Wrong serial number';
+					$response['errorMessage'] = 'Database error';
 				}
 			}
 			

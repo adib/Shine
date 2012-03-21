@@ -54,7 +54,7 @@
 				$plist .= "\t<string>" . htmlspecialchars($value, ENT_NOQUOTES) . "</string>\n";
 			}
 			if (!empty($signature)) {
-				$plist .= "\t<key>Signature</key>\n";
+				$plist .= "\t<key>signature</key>\n";
 				$plist .= "\t<data>$signature</data>\n";
 			}
 			$plist .= "</dict>\n";

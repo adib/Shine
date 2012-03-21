@@ -5,7 +5,14 @@ $app = new Application();
 $app->select($_POST['item_number']); // custom
 if (!$app->ok()) {
 	error_log("Application {$_POST['item_name']} {$_POST['item_number']} not found!");
-	exit;
+	die("Application {$_POST['item_name']} {$_POST['item_number']} not found!");
+}
+
+$lt = new LicenseType();
+$lt->select($_POST['license_type'], 'abbreviation'); // custom
+if (!$lt->ok()) {
+	error_log("License type {$_POST['license_type']} not found!");
+	die("License type {$_POST['license_type']} not found!");
 }
 
 # Security data collect
@@ -16,15 +23,18 @@ foreach ($_REQUEST as $key => $val) {
 }
 
 // FastSpring security check...
-if (md5($check_data . $app->fs_license_key) != $_REQUEST['security_request_hash'])
-	die('Security check failed.');
+//if (md5($check_data . $app->fs_license_key) != $_REQUEST['security_request_hash'])
+//	die('Security check failed.');
 
 # Insert Order
 $o = new Order();
 $o->app_id = $app->id;
 $o->txn_id = $_POST['reference'];
 $o->payer_email = $_POST['email'];
-$o->quantity = $_POST['quantity'];
+$o->quantity = $lt->quantity;
+$ed = $lt->expiration_days;
+if (!empty($ed)) $o->expiration_date = date('Y-m-d', time()+$ed*86400);
+$o->license_type_id = $lt->id;
 $o->dt = dater();
 $o->type = 'FastSpring';
 $o->generateSerial(); # generates serial into $o->serial_number

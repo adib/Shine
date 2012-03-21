@@ -8,6 +8,7 @@
 		$Error->blank($_POST['app_id'], 'Application');
 		$Error->blank($_POST['first_name'], 'First Name');
 		$Error->blank($_POST['last_name'], 'Last Name');
+		$Error->range($_POST['quantity'], 1, 1000, 'Quantity');
 		$Error->email($_POST['email']);
 		
 		if($Error->ok())
@@ -20,12 +21,15 @@
 			$o->payer_email = $_POST['email'];
 			$o->app_id      = $_POST['app_id'];
 			$o->notes       = $_POST['notes'];
+			$o->quantity    = $_POST['quantity'];
+			$o->expiration_date = $_POST['expiration_date'];
 			$o->type        = 'Manual';
 			$o->dt          = dater();
 			$o->item_name   = $app->name;
+			if ($app->activation_online == '1') $o->generateSerial();
 			$o->insert();
 
-			$o->generateLicense();
+			if ($app->activation_online != '1') $o->generateLicense();
 
 			redirect('order.php?id=' . $o->id);
 		}
@@ -35,6 +39,8 @@
 			$last_name  = $_POST['last_name'];
 			$email      = $_POST['email'];
 			$notes      = $_POST['notes'];
+			$quantity   = $_POST['quantity'];
+			$expiration_date = $_POST['expiration_date'];
 		}
 	}
 	else
@@ -43,6 +49,8 @@
 		$last_name  = '';
 		$email      = '';
 		$notes      = '';
+		$quantity   = '1';
+		$expiration_date = date('Y-m-d');
 	}
 	
 	$applications = DBObject::glob('Application', 'SELECT * FROM shine_applications ORDER BY name');
@@ -63,6 +71,8 @@
 								<p><label for="first_name">First Name</label> <input type="text" name="first_name" id="first_name" value="<?PHP echo $first_name; ?>" class="text"></p>
 								<p><label for="last_name">Last Name</label> <input type="text" name="last_name" id="last_name" value="<?PHP echo $last_name; ?>" class="text"></p>
 								<p><label for="email">Email</label> <input type="text" name="email" id="email" value="<?PHP echo $email; ?>" class="text"></p>
+								<p><label for="quantity">Quantity</label> <input type="text" name="quantity" id="quantity" value="<?PHP echo $quantity; ?>" class="text"></p>
+								<p><label for="expiration_date">Expiration date</label> <input type="date" name="expiration_date" id="expiration_date" value="<?PHP echo $expiration_date; ?>" class="text"></p>
 								<p><p><label for="notes">Notes</label> <textarea name="notes" id="notes" class="text"><?PHP echo $notes; ?></textarea></p>
 								<p><input type="submit" name="btnCreateOrder" value="Create Order" id="btnCreateOrder"></p>
 							</form>

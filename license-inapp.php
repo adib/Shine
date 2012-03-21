@@ -2,9 +2,9 @@
 require 'includes/master.inc.php';
 
 $response = array(
-	'result' => false,
+	'result' => 0,
 	'errorCode' => 1,
-	'errorMessage' => 'Incorrect request data'
+	'errorMessage' => 'Empty request data'
 );
 
 if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
@@ -28,13 +28,13 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 			if (!$a->ok()) {
 				# Check activations count
 				$db = Database::getDatabase();
-				$sql = "SELECT o.id, o.quantity, COUNT(*) AS count
-					FROM shine_activations AS a 
-					LEFT JOIN shine_orders AS o ON o.id = a.order_id
+				$sql = "SELECT o.id, o.deactivated, o.quantity, COUNT(a.id) AS count
+					FROM shine_orders AS o 
+					LEFT JOIN shine_activations AS a ON o.id = a.order_id
 					WHERE o.app_id = ".((int)$app->id)." AND o.serial_number = '".$db->escape($serial)."'";
 				if ($db->query($sql) && $db->hasRows()) {
 					$row = $db->getRow();
-					if ($row['quantity'] > 0 && $row['quantity'] > $row['count']) {
+					if ($row['quantity'] > 0 && $row['deactivated'] == 0 && $row['quantity'] > $row['count']) {
 						$a = new Activation();
 						$a->app_id = $app->id;
 						$a->hwid = $hwid;
@@ -46,13 +46,18 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 					}
 					else if ($row['quantity'] <= 0) {
 						$a->id = null;
-						$response['errorCode'] = 6;
+						$response['errorCode'] = 7;
 						$response['errorMessage'] = 'Wrong serial number';
+					}
+					else if ($row['deactivated'] > 0) {
+						$a->id = null;
+						$response['errorCode'] = 6;
+						$response['errorMessage'] = 'License was deactivated';
 					}
 					else {
 						$a->id = null;
 						$response['errorCode'] = 5;
-						$response['errorMessage'] = 'Maximum users for this serial number reached.';
+						$response['errorMessage'] = 'Maximum users for this serial number reached';
 					}
 				}
 				else {
@@ -67,7 +72,7 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 				$license = $a->generateLicenseOnline($a->hwid);
 				
 				$response = array(
-					'result' => true,
+					'result' => 1,
 					'licence' => base64_encode($license)
 				);
 			}
@@ -115,3 +120,4 @@ $a->order_id = $o->id;
 $a->update();
 
 $o->downloadLicense();
+*/

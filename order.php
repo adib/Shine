@@ -38,6 +38,12 @@
 		$o->update();
 		redirect('order.php?id=' . $o->id);
 	}
+	
+	$lt_id = $o->license_type_id;
+	if (!empty($lt_id)) {
+		$lt = new LicenseType($lt_id);
+		if (!$lt->ok()) unset($lt);
+	}
 
 	$app = new Application($o->app_id);
 
@@ -61,12 +67,19 @@
                         <div class="bd">
 							<table class="lines">
 								<?PHP foreach($o->columns as $k => $v) : ?>
-								<?PHP if(strlen(trim($v)) > 0) : ?>
-								<tr>
-									<th><strong><?PHP echo $k; ?></strong></th>
-									<td><?PHP echo $v; ?></td>
-								</tr>
-								<?PHP endif; ?>
+								<?php if ($k == 'license_type_id' && !empty($lt)) : ?>
+									<tr>
+										<th><strong>license_abbreviation</strong></th>
+										<td><a href="license-types.php?id=<?PHP echo $o->app_id; ?>"><?PHP echo $lt->abbreviation; ?></a></td>
+									</tr>
+								<?php else : ?>
+									<?PHP if(strlen(trim($v)) > 0) : ?>
+									<tr>
+										<th><strong><?PHP echo $k; ?></strong></th>
+										<td><?PHP echo $v; ?></td>
+									</tr>
+									<?PHP endif; ?>
+								<?php endif; ?>
 								<?PHP endforeach; ?>
 							</table>
 						</div>

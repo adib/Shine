@@ -17,12 +17,18 @@ class EngineCoppertino extends Engine {
 	# Online license generation
 	public function generateLicenseOnline($hwid)
 	{
-		$rand = EngineOnline::generate_uid(15, true);
+		$rand = EngineOnline::generate_uid(20, false);
+		
+		$lt_id = $this->order->license_type_id;
+		if (!empty($lt_id)) {
+			$lt = new LicenseType($lt_id);
+			if ($lt->ok()) $exp_version = $lt->max_update_version;
+		}
 		$dict = array(
 			'hash' => base64_encode(sha1($hwid . $this->application->bundle_name . $rand, true)),
 			'randValue' => $rand,
-			'expirationDate' => time(),
-			'expirationVersion' => ''
+			'expirationDate' => $this->order->expiration_date,
+			'expirationVersion' => !empty($exp_version) ? $exp_version : ''
 		);
 		$sig = $this->generateLicenseSignature($dict);
 		

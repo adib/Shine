@@ -61,6 +61,11 @@
 			return DBObject::glob('Version', "SELECT * FROM shine_versions WHERE app_id = '{$this->id}' ORDER BY dt DESC");
 		}
 
+		public function license_types()
+		{
+			return DBObject::glob('LicenseType', "SELECT * FROM shine_license_types WHERE app_id = '{$this->id}' ORDER BY abbreviation ASC");
+		}
+
 		public function strCurrentVersion()
 		{
 			$db = Database::getDatabase();
@@ -252,7 +257,7 @@
 		{
 			$app = new Application($this->app_id);
 			$engine = $app->engine();
-			$engine->order = $this;
+			$engine->order = new Order($this->order_id);
 			return $engine->generateLicenseOnline($hwid);
 		}
 	}
@@ -261,7 +266,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_orders', array('app_id', 'dt', 'txn_type', 'first_name', 'last_name', 'residence_country', 'item_name', 'payment_gross', 'mc_currency', 'business', 'payment_type', 'verify_sign', 'payer_status', 'tax', 'payer_email', 'txn_id', 'quantity', 'receiver_email', 'payer_id', 'receiver_id', 'item_number', 'payment_status', 'payment_fee', 'mc_fee', 'shipping', 'mc_gross', 'custom', 'license', 'type', 'deleted', 'hash', 'claimed', 'serial_number', 'notes', 'upgrade_coupon', 'deactivated'), $id);
+            parent::__construct('shine_orders', array('app_id', 'dt', 'txn_type', 'first_name', 'last_name', 'residence_country', 'item_name', 'payment_gross', 'mc_currency', 'business', 'payment_type', 'verify_sign', 'payer_status', 'tax', 'payer_email', 'txn_id', 'quantity', 'receiver_email', 'payer_id', 'receiver_id', 'item_number', 'payment_status', 'payment_fee', 'mc_fee', 'shipping', 'mc_gross', 'custom', 'license', 'type', 'deleted', 'hash', 'claimed', 'serial_number', 'notes', 'upgrade_coupon', 'deactivated', 'expiration_date', 'license_type_id'), $id);
         }
 
 		public function activationCount()
@@ -368,6 +373,14 @@
         public function __construct($id = null)
         {
             parent::__construct('shine_versions', array('app_id', 'human_version', 'version_number', 'dt', 'release_notes', 'filesize', 'url', 'downloads', 'updates', 'signature', 'status'), $id);
+        }
+    }
+
+    class LicenseType extends DBObject
+    {
+        public function __construct($id = null)
+        {
+            parent::__construct('shine_license_types', array('app_id', 'abbreviation', 'quantity', 'expiration_days', 'max_update_version'), $id);
         }
     }
 

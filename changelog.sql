@@ -46,3 +46,19 @@ ADD COLUMN `rsa_pkey` TEXT NOT NULL AFTER rsa_key;
 
 ALTER TABLE `shine_activations`
 ADD COLUMN `hwid` VARCHAR(255) NOT NULL DEFAULT '' AFTER serial_number;
+
+ALTER TABLE `shine_orders`
+ADD COLUMN `expiration_date` DATE NOT NULL,
+ADD COLUMN `license_type_id` INTEGER UNSIGNED NOT NULL DEFAULT 0;
+
+CREATE TABLE `shine_license_types` (
+  `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  `app_id` INTEGER(11) NOT NULL,
+  `abbreviation` VARCHAR(100) NOT NULL,
+  `quantity` INTEGER UNSIGNED NOT NULL DEFAULT 1,
+  `expiration_days` INTEGER UNSIGNED NOT NULL DEFAULT 0,
+  `max_update_version` VARCHAR(255) NOT NULL DEFAULT '',
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY app_id_abbr (`app_id`, `abbreviation`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

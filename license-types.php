@@ -6,20 +6,27 @@ $nav = 'applications';
 $app = new Application($_GET['id']);
 if(!$app->ok()) redirect('index.php');
 
-if (!empty($_REQUEST['act']) && !empty($_REQUEST['abbreviation'])) {
+if (!empty($_REQUEST['act'])) {
 	switch ($_REQUEST['act']) {
+		case 'delete':
+			$lt = new LicenseType($_REQUEST['lt_id']);
+			echo ($lt->ok() && $lt->delete()) ? 'OK' : 'Error';
+			exit;
 		case 'add':
 			$lt = new LicenseType();
 		case 'edit':
 			if (!isset($lt)) $lt = new LicenseType($_REQUEST['lt_id']);
 			
-			$lt->app_id = $app->id;
-			$lt->abbreviation = $_REQUEST['abbreviation'];
-			$lt->quantity = (int)$_REQUEST['quantity'];
-			$lt->expiration_days = (int)$_REQUEST['expiration_days'];
-			$lt->max_update_version = $_REQUEST['max_update_version'];
-			
-			$lt->save();
+			if (!empty($_REQUEST['abbreviation'])) {
+				$lt->app_id = $app->id;
+				$lt->abbreviation = $_REQUEST['abbreviation'];
+				$lt->quantity = (int)$_REQUEST['quantity'];
+				$lt->expiration_days = (int)$_REQUEST['expiration_days'];
+				$lt->max_update_version = $_REQUEST['max_update_version'];
+				
+				$lt->save();
+			}
+			else $lt->id = null;
 			
 			echo $lt->ok() ? 'OK' : 'Error';
 			exit;
@@ -134,6 +141,20 @@ $(function(){
 	});
 	$('.edit_lt, .cancel_lt').click(function(){
 		$(this).parent().parent().find('.show_lt').toggleClass('hid');
+		return false;
+	});
+	$('.delete_lt').click(function(){
+		var top = $(this).parent().siblings();
+		var in_data = {'act': 'delete', 'lt_id': top.find('[name=lt_id]').attr('value'), 'id': top.find('[name=id]').attr('value')};
+		
+		$.get(document.location, in_data, function(data){
+			if (data && data == 'OK') window.location.reload();
+			else {
+				var err = 'Could not delete from database :(';
+				$('.error_lt').removeClass('hid').html(err);
+			}
+			return false;
+		});
 		return false;
 	});
 });

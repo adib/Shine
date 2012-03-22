@@ -27,7 +27,7 @@ class EngineCoppertino extends Engine {
 		$dict = array(
 			'hash' => base64_encode(sha1($hwid . $this->application->bundle_name . $rand, true)),
 			'randValue' => $rand,
-			'expirationDate' => $this->order->expiration_date,
+			'expirationDate' => (int)strtotime($this->order->expiration_date),
 			'expirationVersion' => !empty($exp_version) ? $exp_version : ''
 		);
 		$sig = $this->generateLicenseSignature($dict);

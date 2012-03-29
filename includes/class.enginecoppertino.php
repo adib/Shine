@@ -25,7 +25,7 @@ class EngineCoppertino extends Engine {
 			if ($lt->ok()) $exp_version = $lt->max_update_version;
 		}
 		$dict = array(
-			'hash' => base64_encode(sha1($hwid . $this->application->bundle_name . $rand, true)),
+			'hash' => base64_encode(sha1($hwid . $this->application->bundle_id . $rand, true)),
 			'randValue' => $rand,
 			'expirationDate' => (int)strtotime($this->order->expiration_date),
 			'expirationVersion' => !empty($exp_version) ? $exp_version : ''

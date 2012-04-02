@@ -40,6 +40,7 @@
 			$app->return_url        = $_POST['return_url'];
 			$app->fs_license_key    = $_POST['fs_license_key'];
 			$app->fs_security_key   = $_POST['fs_security_key'];
+			$app->mu_license_key    = $_POST['mu_license_key'];
 			$app->tweet_terms       = $_POST['tweet_terms'];
 			$app->upgrade_app_id    = $_POST['upgrade_app_id'];
 			$app->engine_class_name = $_POST['engine_class_name'];
@@ -75,6 +76,7 @@
 			$return_url        = $_POST['return_url'];
 			$fs_license_key    = $_POST['fs_license_key'];
 			$fs_security_key   = $_POST['fs_security_key'];
+			$mu_license_key    = $_POST['mu_license_key'];
 			$tweet_terms       = $_POST['tweet_terms'];
 			$upgrade_app_id    = $_POST['upgrade_app_id'];
 			$engine_class_name = $_POST['engine_class_name'];
@@ -109,6 +111,7 @@
 		$return_url        = $app->return_url;
 		$fs_license_key    = $app->fs_license_key;
 		$fs_security_key   = $app->fs_security_key;
+		$mu_license_key    = $app->mu_license_key;
 		$tweet_terms       = $app->tweet_terms;
 		$upgrade_app_id    = $app->upgrade_app_id;
 		$engine_class_name = $app->engine_class_name;
@@ -314,6 +317,14 @@
                                     <label for="return_url">Item Notification Security Key</label>
                                     <input type="text" class="text" name="fs_security_key" value="<?PHP echo $fs_security_key; ?>" id="fs_security_key">
                                 </p>                                
+
+                                <hr>
+
+                                <h3>MacUpdate</h3>
+                                <p>
+                                    <label for="mu_license_key">License Request (Fulfillment) Security Key</label>
+                                    <input type="text" class="text" name="mu_license_key" value="<?PHP echo $mu_license_key; ?>" id="mu_license_key">
+                                </p>  
 
                                 <hr>
 								

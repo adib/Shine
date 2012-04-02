@@ -62,3 +62,12 @@ CREATE TABLE `shine_license_types` (
   PRIMARY KEY (`id`),
   UNIQUE KEY app_id_abbr (`app_id`, `abbreviation`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+-- 2012.04.02 - MacUpdate
+
+ALTER TABLE `shine_applications`
+ADD COLUMN `mu_license_key` varchar(45) NOT NULL AFTER fs_security_key;
+
+ALTER TABLE `shine_orders`
+MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','MacUpdate') CHARACTER SET latin1 NOT NULL;

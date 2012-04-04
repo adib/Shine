@@ -20,7 +20,7 @@
 	{
 		$v->version_number = $_POST['version_number'];
 		$v->human_version  = $_POST['human_version'];
-		$v->url = $_POST['url'];
+		$v->alternate_fname = $_POST['alternate_fname'];
 		$v->release_notes  = $_POST['release_notes'];
 		$v->filesize = $_POST['filesize'];
 		$v->signature = $_POST['signature'];
@@ -31,7 +31,7 @@
 	$version_number = $v->version_number;
 	$human_version  = $v->human_version;
 	$release_notes  = $v->release_notes;
-	$url            = $v->url;
+	$alternate_fname = $v->alternate_fname;
 	$signature      = $v->signature;
 	$filesize       = $v->filesize;	
 	$status		= $v->status;
@@ -65,7 +65,7 @@
 								</p>
 								<p><label for="version_number">Version Number</label> <input type="text" name="version_number" id="version_number" value="<?PHP echo $version_number;?>" class="text"></p>
 								<p><label for="human_version">Human Readable Version Number</label> <input type="text" name="human_version" id="human_version" value="<?PHP echo $human_version;?>" class="text"></p>
-								<p><label for="url">Filename</label> <input type="text" name="url" id="url" value="<?PHP echo $url;?>" class="text"></p>
+								<p><label for="alternate_fname">Alternate Filename (optional)</label> <input type="text" name="alternate_fname" id="alternate_fname" value="<?PHP echo $alternate_fname;?>" class="text"></p>
 								<p><label for="release_notes">Release Notes</label> <textarea class="text" name="release_notes" id="release_notes"><?PHP echo $release_notes; ?></textarea></p>
 								<p><label for="filesize">Filesize</label> <input type="text" name="filesize" id="filesize" value="<?PHP echo $filesize; ?>" class="text"></p>
 								<p><label for="signature">Sparkle Signature</label> <input type="text" name="signature" id="signature" value="<?PHP echo $signature; ?>" class="text"></p>

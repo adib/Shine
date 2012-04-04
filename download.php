@@ -44,8 +44,10 @@ if ($a->ok()) {
 	
 		Download::track();
 		
+		$fname = $v->alternate_fname;
+		
 		header('Content-Description: File Transfer');
-		header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . $v->url)."\"");
+		header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . (!empty($fname) ? $fname : $v->url))."\"");
 		header("Content-Type: application/octet-stream");
 		header('Content-Transfer-Encoding: binary');
 		
@@ -69,8 +71,7 @@ if ($a->ok()) {
 		}
 		# Simple readfile
 		else {
-			header('Content-Length: ' . filesize(LOCAL_UPLOAD_PATH . '/' . $v->url));
-			
+			header('Content-Length: ' . (string)filesize(LOCAL_UPLOAD_PATH . '/' . $v->url));
 			readfile(LOCAL_UPLOAD_PATH . '/' . $v->url);
 		}
 		exit;

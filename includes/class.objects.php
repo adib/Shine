@@ -372,7 +372,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_versions', array('app_id', 'human_version', 'version_number', 'dt', 'release_notes', 'filesize', 'url', 'downloads', 'updates', 'signature', 'status'), $id);
+            parent::__construct('shine_versions', array('app_id', 'human_version', 'version_number', 'dt', 'release_notes', 'filesize', 'url', 'alternate_fname', 'downloads', 'updates', 'signature', 'status'), $id);
         }
     }
 

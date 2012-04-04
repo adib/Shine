@@ -78,3 +78,7 @@ MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','Ma
 ALTER TABLE `shine_applications`
 ADD COLUMN `abbreviation` VARCHAR(15) NOT NULL AFTER id,
 ADD COLUMN `direct_download` TINYINT(1) UNSIGNED NOT NULL;
+
+
+ALTER TABLE `shine_versions`
+ADD COLUMN `alternate_fname` VARCHAR(255) NOT NULL AFTER url;

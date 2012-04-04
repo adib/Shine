@@ -25,7 +25,8 @@
 			$v->signature      = sign_file($_FILES['file']['tmp_name'], $app->sparkle_pkey);
 			$v->status         = !empty($_POST['version_status']) ? $_POST['version_status'] : VERSION_STATUS_PRODUCTION;
 			
-			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+			if (!empty($_POST['url'])) $object = $_POST['url'];
+			else $object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
 			$v->url = $object;
 			chmod($_FILES['file']['tmp_name'], 0755);
 			
@@ -44,6 +45,7 @@
 			$version_number = $_POST['version_number'];
 			$human_version  = $_POST['human_version'];
 			$release_notes  = $_POST['release_notes'];
+			$url  = $_POST['url'];
 		}
 	}
 	else
@@ -51,6 +53,7 @@
 		$version_number = '';
 		$human_version  = '';
 		$release_notes  = '';
+		$url = '';
 	}
 	
 	// It would be better to use PHP's native OpenSSL extension
@@ -99,6 +102,7 @@
 										<option value="<?php echo VERSION_STATUS_TEST; ?>"> Test
 									</select>
 								</p>
+								<p><label for="url">Filename (optional)</label> <input type="text" name="url" id="url" value="<?PHP echo $url;?>" class="text"><span class="info">ex.: foc_1.2.5.00.942.5.dmg</span></p>
 								<p><label for="version_number">Sparkle Version Number</label> <input type="text" name="version_number" id="version_number" value="<?PHP echo $version_number;?>" class="text"></p>
 								<p><label for="human_version">Human Readable Version Number</label> <input type="text" name="human_version" id="human_version" value="<?PHP echo $human_version;?>" class="text"></p>
 								<p><label for="release_notes">Release Notes</label> <textarea class="text" name="release_notes" id="release_notes"><?PHP echo $release_notes; ?></textarea></p>

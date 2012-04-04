@@ -31,7 +31,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_applications', array('name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 'sparkle_key', 'sparkle_pkey', 'activation_online', 'activation_online_class', 'ap_key', 'ap_pkey', 'cf_key', 'cf_pkey', 'rsa_key', 'rsa_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_license_key', 'fs_security_key', 'mu_license_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name', 'bundle_id'), $id);
+            parent::__construct('shine_applications', array('abbreviation', 'name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 'sparkle_key', 'sparkle_pkey', 'activation_online', 'activation_online_class', 'ap_key', 'ap_pkey', 'cf_key', 'cf_pkey', 'rsa_key', 'rsa_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_license_key', 'fs_security_key', 'mu_license_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name', 'bundle_id', 'direct_download'), $id);
         }
 
 		public function engine()

@@ -71,3 +71,10 @@ ADD COLUMN `mu_license_key` varchar(45) NOT NULL AFTER fs_security_key;
 
 ALTER TABLE `shine_orders`
 MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','MacUpdate') CHARACTER SET latin1 NOT NULL;
+
+
+-- 2012.04.04
+
+ALTER TABLE `shine_applications`
+ADD COLUMN `abbreviation` VARCHAR(15) NOT NULL AFTER id,
+ADD COLUMN `direct_download` TINYINT(1) UNSIGNED NOT NULL;

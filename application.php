@@ -13,6 +13,7 @@
 		if($Error->ok())
 		{
 			$app                    = new Application($_GET['id']);
+			$app->abbreviation      = $_POST['abbreviation'];
 			$app->name              = $_POST['name'];
 			$app->link              = $_POST['link'];
 			$app->bundle_name       = $_POST['bundle_name'];
@@ -44,11 +45,13 @@
 			$app->tweet_terms       = $_POST['tweet_terms'];
 			$app->upgrade_app_id    = $_POST['upgrade_app_id'];
 			$app->engine_class_name = $_POST['engine_class_name'];
+			$app->direct_download   = $_POST['direct_download'];
 			$app->update();
 			redirect('application.php?id=' . $app->id);
 		}
 		else
 		{
+			$abbreviation      = $_POST['abbreviation'];
 			$name              = $_POST['name'];
 			$link              = $_POST['link'];
 			$bundle_name       = $_POST['bundle_name'];
@@ -80,10 +83,12 @@
 			$tweet_terms       = $_POST['tweet_terms'];
 			$upgrade_app_id    = $_POST['upgrade_app_id'];
 			$engine_class_name = $_POST['engine_class_name'];
+			$direct_download   = $_POST['direct_download'];
 		}
 	}
 	else
 	{
+		$abbreviation      = $app->abbreviation;
 		$name              = $app->name;
 		$link              = $app->link;
 		$bundle_name       = $app->bundle_name;
@@ -115,6 +120,7 @@
 		$tweet_terms       = $app->tweet_terms;
 		$upgrade_app_id    = $app->upgrade_app_id;
 		$engine_class_name = $app->engine_class_name;
+		$direct_download   = $app->direct_download;
 	}
 
 	$upgrade_apps = DBObject::glob('Application', "SELECT * FROM shine_applications WHERE id <> '{$app->id}' ORDER BY name");
@@ -165,6 +171,19 @@
 							<?PHP echo $Error; ?>
 							<form action="application.php?id=<?PHP echo $app->id; ?>" method="post">
 								<h3>Basic Stuff</h3>
+                                <p>
+									<label for="name">Application Abbreviation</label>
+                                    <input type="text" class="text" name="abbreviation" id="abbreviation" value="<?PHP echo $abbreviation; ?>">
+                                    <span class="info">Ex: FOC, COP, WPW</span>
+                                </p>
+				<p>
+					<label for="direct_download">Direct Download Type</label><br>
+					<select name="direct_download" id="direct_download">
+						<option value="0" <?PHP if ($direct_download == '0') echo 'selected="selected"'; ?>>PHP readfile() function</option>
+						<option value="1" <?PHP if ($direct_download == '1') echo 'selected="selected"'; ?>>Webserver file download</option>
+					</select><br/>
+					<span class="info">When chosen 'PHP readfile() function', download.php will return the file itself with readfile(), while 'Webserver file download' option means, that the webserver itself will handle file downloads (supports Apache, Nginx and Lighttpd webservers)</span>
+                                </p>
                                 <p>
 									<label for="name">Application Name</label>
                                     <input type="text" class="text" name="name" id="name" value="<?PHP echo $name; ?>">

@@ -2,8 +2,13 @@
     // This is your basic, run of the mill appcast feed
 
 	require 'includes/master.inc.php';
+	require_once 'includes/class.config.php';
 
-	$app = new Application($_GET['id']);
+	if (!empty($_GET['id'])) $app = new Application($_GET['id']);
+	else {
+		$app = new Application();
+		$app->select($_GET['abbr'], 'abbreviation');
+	}
 	if(!$app->ok()) die('Application not found');
 	
 	$status = VERSION_STATUS_PRODUCTION;
@@ -51,7 +56,7 @@
 			<title><?PHP echo $app->name; ?> <?PHP echo $v->human_version; ?></title>
 			<description><![CDATA[ <?PHP echo $v->release_notes; ?> ]]></description>
 			<pubDate><?PHP echo dater('D, d M Y H:i:s O', $v->dt); ?></pubDate>
-			<enclosure url="<?PHP echo 'dl/'.$v->url; ?>" sparkle:shortVersionString="<?PHP echo $v->human_version; ?>" sparkle:version="<?PHP echo $v->version_number; ?>" length="<?PHP echo $v->filesize; ?>" type="application/octet-stream" sparkle:dsaSignature="<?PHP echo $v->signature; ?>" />
+			<enclosure url="<?PHP echo HTTP_SITE_NAME.'/dl/'.$v->url; ?>" sparkle:shortVersionString="<?PHP echo $v->human_version; ?>" sparkle:version="<?PHP echo $v->version_number; ?>" length="<?PHP echo $v->filesize; ?>" type="application/octet-stream" sparkle:dsaSignature="<?PHP echo $v->signature; ?>" />
 		</item>
 		<?PHP endforeach; ?>
 		<?PHP if($pirate === true) : ?>

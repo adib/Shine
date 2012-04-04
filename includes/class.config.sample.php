@@ -20,6 +20,8 @@
 	define('VERSION_STATUS_BETA', 2);
 	define('VERSION_STATUS_TEST', 3);
 	
+	define('HTTP_SITE_NAME', !empty($_SERVER['SERVER_NAME']) ? 'http://'.$_SERVER['SERVER_NAME'] : '');
+	
 	
 
     class Config

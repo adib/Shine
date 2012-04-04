@@ -47,6 +47,7 @@ if ($a->ok()) {
 		header('Content-Description: File Transfer');
 		header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . $v->url)."\"");
 		header("Content-Type: application/octet-stream");
+		header('Content-Transfer-Encoding: binary');
 		
 		# Webserver file download
 		if ($a->direct_download == '1') {
@@ -54,8 +55,6 @@ if ($a->ok()) {
 			if (!empty($_SERVER['SERVER_SOFTWARE']) && stripos($_SERVER['SERVER_SOFTWARE'], 'apache') !== false) $server = 'apache';
 			else if (!empty($_SERVER['SERVER_SOFTWARE']) && stripos($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false) $server = 'nginx';
 			
-			header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . $v->url)."\"");
-			header("Content-Type: application/octet-stream");
 			switch ($server) {
 				case 'lighttpd':
 					header("X-LIGHTTPD-send-file: " . LOCAL_UPLOAD_PATH . '/' . $v->url);
@@ -70,7 +69,6 @@ if ($a->ok()) {
 		}
 		# Simple readfile
 		else {
-			header('Content-Transfer-Encoding: binary');
 			header('Content-Length: ' . filesize(LOCAL_UPLOAD_PATH . '/' . $v->url));
 			
 			readfile(LOCAL_UPLOAD_PATH . '/' . $v->url);

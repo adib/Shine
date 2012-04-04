@@ -182,7 +182,7 @@
 						<option value="0" <?PHP if ($direct_download == '0') echo 'selected="selected"'; ?>>PHP readfile() function</option>
 						<option value="1" <?PHP if ($direct_download == '1') echo 'selected="selected"'; ?>>Webserver file download</option>
 					</select><br/>
-					<span class="info">When chosen 'PHP readfile() function', download.php will return the file itself with readfile(), while 'Webserver file download' option means, that the webserver itself will handle file downloads (supports Apache, Nginx and Lighttpd webservers)</span>
+					<span class="info">When chosen 'PHP readfile() function', download.php will return the file itself with readfile(), while 'Webserver file download' option means, that the webserver itself will handle file downloads. To use webserver file downloads, you need to turn them on in webserver's settings, look for 'X-Sendfile setting' in your webserver (supports Apache, Nginx and Lighttpd webservers)</span>
                                 </p>
                                 <p>
 									<label for="name">Application Name</label>

@@ -73,5 +73,10 @@ if ($a->ok()) {
 			
 			readfile(LOCAL_UPLOAD_PATH . '/' . $v->url);
 		}
+		exit;
 	}
 }
+
+# No file
+header("HTTP/1.0 404 File Not Found");
+echo '<html><head><title>404 - Not Found</title></head><body><h1>404 - Not Found</h1></body></html>';

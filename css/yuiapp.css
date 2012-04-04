@@ -1,5 +1,7 @@
 html, body { background-color:#f0f0ee; color:#222; }
 
+.hid { display: none!important; }
+
 /* Make the page full bleed */
 #doc3 { margin:0; }
 

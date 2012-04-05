@@ -82,3 +82,9 @@ ADD COLUMN `direct_download` TINYINT(1) UNSIGNED NOT NULL;
 
 ALTER TABLE `shine_versions`
 ADD COLUMN `alternate_fname` VARCHAR(255) NOT NULL AFTER url;
+
+
+-- 2012.04.05
+
+ALTER TABLE `shine_feedback`
+ADD COLUMN `notes` TEXT NOT NULL;

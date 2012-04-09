@@ -46,6 +46,10 @@
 			$app->upgrade_app_id    = $_POST['upgrade_app_id'];
 			$app->engine_class_name = $_POST['engine_class_name'];
 			$app->direct_download   = $_POST['direct_download'];
+			$app->use_ga            = $_POST['use_ga'];
+			$app->ga_key            = $_POST['ga_key'];
+			$app->ga_domain         = $_POST['ga_domain'];
+			$app->ga_country        = $_POST['ga_country'];
 			$app->update();
 			redirect('application.php?id=' . $app->id);
 		}
@@ -84,6 +88,10 @@
 			$upgrade_app_id    = $_POST['upgrade_app_id'];
 			$engine_class_name = $_POST['engine_class_name'];
 			$direct_download   = $_POST['direct_download'];
+			$use_ga            = $_POST['use_ga'];
+			$ga_key            = $_POST['ga_key'];
+			$ga_domain         = $_POST['ga_domain'];
+			$ga_country        = $_POST['ga_country'];
 		}
 	}
 	else
@@ -121,6 +129,10 @@
 		$upgrade_app_id    = $app->upgrade_app_id;
 		$engine_class_name = $app->engine_class_name;
 		$direct_download   = $app->direct_download;
+		$use_ga            = $app->use_ga;
+		$ga_key            = $app->ga_key;
+		$ga_domain         = $app->ga_domain;
+		$ga_country        = $app->ga_country;
 	}
 
 	$upgrade_apps = DBObject::glob('Application', "SELECT * FROM shine_applications WHERE id <> '{$app->id}' ORDER BY name");
@@ -223,6 +235,29 @@
 									</select><br/>
 									<span class="info">Choosing an app here will provide a one-click option to upgrade existing orders to the selected app.</span>
                                 </p>
+                                
+				<hr>
+				<h3>Google Analytics</h3>
+				<p>
+					<input type="checkbox" name="use_ga" id="use_ga" value="1" <?PHP echo $use_ga == 1 ? 'checked="checked"' : ''; ?>>
+					<label for="use_ga">Use GA</label>
+					<span class="info">If checked, updates and online activations will be tracked (with _trackEvent) to your GA account</span>
+				</p>
+				<p>
+					<label for="ga_key">GA key (account id)</label>
+					<input type="text" class="text" name="ga_key" id="ga_key" value="<?PHP echo $ga_key; ?>">
+					<span class="info">Example: UA-123456-78</span>
+				</p>
+				<p>
+					<label for="ga_domain">GA domain</label>
+					<input type="text" class="text" name="ga_domain" id="ga_domain" value="<?PHP echo $ga_domain; ?>">
+					<span class="info">Example: example.com, yourdomain.net</span>
+				</p>
+				<p>
+					<input type="checkbox" name="ga_country" id="ga_country" value="1" <?PHP echo $ga_country == 1 ? 'checked="checked"' : ''; ?>>
+					<label for="ga_country">Track countries</label>
+					<span class="info">If checked, countries will be added to GA tracks like 'label' parameter</span>
+				</p>
 
 
 								<hr>

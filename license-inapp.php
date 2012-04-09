@@ -1,5 +1,6 @@
 <?php
 require 'includes/master.inc.php';
+use UnitedPrototype\GoogleAnalytics;
 
 $response = array(
 	'result' => 0,
@@ -24,6 +25,29 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 			);
 			$a->selectMultiple($params);
 			
+			if ($app->use_ga == 1) {
+				$uuid_ga = abs(crc32($hwid)); # unsigned crc32
+				// Initilize GA Tracker
+				$tracker = new GoogleAnalytics\Tracker($app->ga_key, $app->ga_domain);
+				
+				// Assemble Visitor information
+				// (could also get unserialized from database)
+				$visitor = new GoogleAnalytics\Visitor();
+				$visitor->setUniqueId($uuid_ga);
+				$visitor->setIpAddress($_SERVER['REMOTE_ADDR']);
+				$visitor->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+				$visitor->setScreenResolution('1024x768');
+				$ga_country = null;
+				if ($app->ga_country == 1 && function_exists('geoip_country_code_by_name')) {
+					$ga_country = geoip_country_code_by_name($_SERVER['REMOTE_ADDR']);
+					if ($ga_country == '') $ga_country = 'XX';
+				}
+				
+				// Assemble Session information
+				// (could also get unserialized from PHP session)
+				$session = new GoogleAnalytics\Session();
+			}
+			
 			# If not found
 			if (!$a->ok()) {
 				# Check activations count
@@ -43,6 +67,11 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 						$a->ip = $_SERVER['REMOTE_ADDR'];
 						$a->order_id = $row['id'];
 						$a->insert();
+						
+						if ($app->use_ga == 1) {
+							$ga_action = 'New Activation';
+							$ga_added = $ga_last = $ga_current = new DateTime($a->dt);
+						}
 					}
 					else if ($row['quantity'] <= 0) {
 						$a->id = null;
@@ -66,8 +95,23 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 					$response['errorMessage'] = 'Database error';
 				}
 			}
+			# Found, re-generate
+			else if ($app->use_ga == 1) {
+				$ga_action = 'ReActivation';
+				$ga_added = $ga_last = $ga_current = new DateTime($a->dt);
+			}
 			
 			if ($a->ok()) {
+				if ($app->use_ga == 1) {
+					$visitor->setFirstVisitTime($ga_added);
+					$visitor->setPreviousVisitTime($ga_last);
+					$visitor->setCurrentVisitTime($ga_current);
+					// Assemble Event information
+					$event = new GoogleAnalytics\Event($app->name, $ga_action, $ga_country, null, true);
+					// Track event
+					$tracker->trackEvent($event, $session, $visitor);
+				}
+				
 				# Generate license and respond
 				$license = $a->generateLicenseOnline($a->hwid);
 				

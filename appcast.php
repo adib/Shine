@@ -3,6 +3,7 @@
 
 	require 'includes/master.inc.php';
 	require_once 'includes/class.config.php';
+	use UnitedPrototype\GoogleAnalytics;
 
 	if (!empty($_GET['id'])) $app = new Application($_GET['id']);
 	else {
@@ -32,6 +33,35 @@
 	$versions = DBObject::glob('Version', "SELECT * FROM shine_versions WHERE app_id = '{$app->id}' AND status = ".$status." ORDER BY dt DESC LIMIT 10");
 
 	$db->query("UPDATE shine_versions SET updates = updates + 1 WHERE app_id = '{$app->id}' AND status = ".$status." ORDER BY dt DESC LIMIT 1");
+	
+	# Google Analytics
+	if ($app->use_ga == 1) {
+		$uuid_ga = abs(crc32($dt)); # unsigned crc32
+		// Initilize GA Tracker
+		$tracker = new GoogleAnalytics\Tracker($app->ga_key, $app->ga_domain);
+		
+		// Assemble Visitor information
+		// (could also get unserialized from database)
+		$visitor = new GoogleAnalytics\Visitor();
+		$visitor->setUniqueId($uuid_ga);
+		$visitor->setIpAddress($_SERVER['REMOTE_ADDR']);
+		$visitor->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+		$visitor->setScreenResolution('1024x768');
+		
+		$ga_country = null;
+		if ($app->ga_country == 1 && function_exists('geoip_country_code_by_name')) {
+			$ga_country = geoip_country_code_by_name($ip);
+			if ($ga_country == '') $ga_country = 'XX';
+		}
+		
+		// Assemble Session information
+		// (could also get unserialized from PHP session)
+		$session = new GoogleAnalytics\Session();
+		// Assemble Event information
+		$event = new GoogleAnalytics\Event($app->name, 'Update', $ga_country, null, true);
+		// Track event
+		$tracker->trackEvent($event, $session, $visitor);
+	}
 	
 	$pirate = false;
 	if(isset($_GET['serialNumber'])) {

@@ -604,11 +604,24 @@
         echo WEB_ROOT;
     }
 
-    // Class Autloader
-    function __autoload($class_name)
-    {
-        require DOC_ROOT . '/includes/class.' . strtolower($class_name) . '.php';
-    }
+# Google Analytics autoloader
+spl_autoload_register(function($className) {
+	if($className[0] == '\\') {
+		$className = substr($className, 1);
+	}
+	
+	// Leave if class should not be handled by this autoloader
+	if(strpos($className, 'UnitedPrototype\\GoogleAnalytics') !== 0) return;
+	
+	$classPath = strtr(substr($className, strlen('UnitedPrototype')), '\\', '/') . '.php';
+	
+	require(DOC_ROOT . $classPath);
+});
+
+# Default Shine autoloader
+spl_autoload_register(function($class_name) {
+	require DOC_ROOT . '/includes/class.' . strtolower($class_name) . '.php';
+});
 
     // Returns a file's mimetype based on its extension
     function mime_type($filename, $default = 'application/octet-stream')

@@ -241,7 +241,7 @@
 				<p>
 					<input type="checkbox" name="use_ga" id="use_ga" value="1" <?PHP echo $use_ga == 1 ? 'checked="checked"' : ''; ?>>
 					<label for="use_ga">Use GA</label>
-					<span class="info">If checked, updates and online activations will be tracked (with _trackEvent) to your GA account</span>
+					<span class="info">If checked, downloads, updates and online activations will be tracked (with _trackEvent) to your GA account</span>
 				</p>
 				<p>
 					<label for="ga_key">GA key (account id)</label>
@@ -249,7 +249,7 @@
 					<span class="info">Example: UA-123456-78</span>
 				</p>
 				<p>
-					<label for="ga_domain">GA domain</label>
+					<label for="ga_domain">GA domain (your site)</label>
 					<input type="text" class="text" name="ga_domain" id="ga_domain" value="<?PHP echo $ga_domain; ?>">
 					<span class="info">Example: example.com, yourdomain.net</span>
 				</p>

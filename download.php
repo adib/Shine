@@ -7,6 +7,7 @@
 
 require 'includes/master.inc.php';
 require_once 'includes/class.localupload.php';
+use UnitedPrototype\GoogleAnalytics;
 
 if (isset($_GET['id'])) {
 	$a = new Application($_GET['id']);
@@ -43,6 +44,34 @@ if ($a->ok()) {
 		$v->update();
 	
 		Download::track();
+		# Google Analytics
+		if ($a->use_ga == 1) {
+			$uuid_ga = abs(crc32(dater())); # unsigned crc32
+			// Initilize GA Tracker
+			$tracker = new GoogleAnalytics\Tracker($a->ga_key, $a->ga_domain);
+			
+			// Assemble Visitor information
+			// (could also get unserialized from database)
+			$visitor = new GoogleAnalytics\Visitor();
+			$visitor->setUniqueId($uuid_ga);
+			$visitor->setIpAddress($_SERVER['REMOTE_ADDR']);
+			$visitor->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+			$visitor->setScreenResolution('1024x768');
+			
+			$ga_country = null;
+			if ($a->ga_country == 1 && function_exists('geoip_country_code_by_name')) {
+				$ga_country = geoip_country_code_by_name($ip);
+				if ($ga_country == '') $ga_country = 'XX';
+			}
+			
+			// Assemble Session information
+			// (could also get unserialized from PHP session)
+			$session = new GoogleAnalytics\Session();
+			// Assemble Event information
+			$event = new GoogleAnalytics\Event($a->name, 'Update', $ga_country, null, true);
+			// Track event
+			$tracker->trackEvent($event, $session, $visitor);
+		}
 		
 		$fname = $v->alternate_fname;
 		

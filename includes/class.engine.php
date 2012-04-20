@@ -62,4 +62,21 @@
 			
 			return $plist;
 		}
+		
+		# Generates xml file (for Win apps)
+		static public function generateXML($dict, $signature) {
+			$xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?".">\n";
+			$xml .= "<License>\n";
+			
+			foreach($dict as $key => $value) {
+				$key = htmlspecialchars(ucfirst($key), ENT_NOQUOTES);
+				$value = htmlspecialchars(utf8_encode($value), ENT_NOQUOTES);
+				$xml .= "\t<".$key.">" . $value . "</".$key.">\n";
+			}
+			if (!empty($signature)) $xml .= "\t<Signature>$signature</Signature>\n";
+			
+			$xml .= "</License>\n";
+			
+			return $xml;
+		}
 	}

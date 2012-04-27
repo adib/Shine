@@ -156,3 +156,10 @@ a.big-button:hover {
 table.lines tr {
 	border-bottom:1px solid #F0F0EE;
 }
+
+.total_num {
+	float: right;
+	width: 200px;
+	font-size: 16px;
+	color: #BF6E37;
+}

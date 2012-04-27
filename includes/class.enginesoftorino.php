@@ -25,6 +25,7 @@ class EngineSoftorino extends Engine {
 			if ($lt->ok()) $exp_version = $lt->max_update_version;
 		}
 		$dict = array(
+			'type' => $lt->abbreviation,
 			'hash' => base64_encode(sha1($hwid . $this->application->bundle_id . $rand, true)),
 			'randValue' => $rand,
 			'expirationDate' => $this->order->expiration_date != '0000-00-00' ? (int)strtotime($this->order->expiration_date) : 0, # strtotime error for PHP <= 5.2.6

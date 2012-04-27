@@ -19,7 +19,7 @@
 		$search_sql = '';
 	}
 
-	if(isset($_GET['id']))
+	if(!empty($_GET['id']))
 	{
 		$app_id = intval($_GET['id']);
 		$total_num_orders = $db->getValue("SELECT COUNT(*) FROM shine_orders WHERE app_id = $app_id $search_sql ORDER BY dt DESC");
@@ -80,7 +80,7 @@
                         <div class="hd">
                             <h2>Orders</h2>
 							<ul>
-								<li class="<?PHP if(!isset($_GET['id'])) echo 'active'; ?>"><a href="orders.php">All Orders</a></li>
+								<li class="<?PHP if(empty($_GET['id'])) echo 'active'; ?>"><a href="orders.php">All Orders</a></li>
 								<?PHP foreach($applications as $a) : if(!in_array($a->id, $available_apps)) continue; ?>
 								<li class="<?PHP if(@$_GET['id'] == $a->id) echo 'active'; ?>"><a href="orders.php?id=<?PHP echo $a->id; ?>"><?PHP echo $a->name; ?></a></li>
 								<?PHP endforeach; ?>
@@ -88,6 +88,7 @@
 							<div class="clear"></div>
                         </div>
                         <div class="bd">
+                        	<div class="total_num">Total orders: <?php echo $total_num_orders; ?></div>
 	                        <ul class="pager">
                                 <li><a href="orders.php?page=<?PHP echo $pager->prevPage(); ?>&amp;id=<?PHP echo @$app_id; ?>">&#171; Prev</a></li>
 								<?PHP for($i = 1; $i <= $pager->numPages; $i++) : ?>

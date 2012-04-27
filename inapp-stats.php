@@ -136,6 +136,8 @@ else {
 					<div class="clear"></div>
 				</div>
 				<div class="bd">
+					<div class="total_num">Total purchases: <?php echo $count; ?></div>
+					
 					<?php 
 					######################################################## TABLE VIEW ########################################################
 					if (isset($url['tables'])) {?>
@@ -190,7 +192,6 @@ else {
 							<?PHP endfor; ?>
 							<li><a href="<?PHP echo $nav.'.php?'.http_build_query(array_merge($url, array('page' => $pager->nextPage()))); ?>">Next &#187;</a></li>
 						</ul>
-						<h2 style="text-align: right;">Total: <?php echo $count.' purchases</h2>'; ?>
 					<?php }
 					######################################################## GRAPHIC VIEW ########################################################
 					else {

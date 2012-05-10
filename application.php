@@ -50,6 +50,10 @@
 			$app->ga_key            = $_POST['ga_key'];
 			$app->ga_domain         = $_POST['ga_domain'];
 			$app->ga_country        = $_POST['ga_country'];
+			$app->getdealy_name     = $_POST['getdealy_name'];
+			$app->default_license_abbr = $_POST['default_license_abbr'];
+			$app->getdealy_price    = $_POST['getdealy_price'];
+			$app->use_postmark      = $_POST['use_postmark'];
 			$app->update();
 			redirect('application.php?id=' . $app->id);
 		}
@@ -92,6 +96,10 @@
 			$ga_key            = $_POST['ga_key'];
 			$ga_domain         = $_POST['ga_domain'];
 			$ga_country        = $_POST['ga_country'];
+			$getdealy_name     = $_POST['getdealy_name'];
+			$default_license_abbr = $_POST['default_license_abbr'];
+			$getdealy_price    = $_POST['getdealy_price'];
+			$use_postmark      = $_POST['use_postmark'];
 		}
 	}
 	else
@@ -133,6 +141,10 @@
 		$ga_key            = $app->ga_key;
 		$ga_domain         = $app->ga_domain;
 		$ga_country        = $app->ga_country;
+		$getdealy_name     = $app->getdealy_name;
+		$default_license_abbr = $app->default_license_abbr;
+		$getdealy_price    = $app->getdealy_price;
+		$use_postmark      = $app->use_postmark;
 	}
 
 	$upgrade_apps = DBObject::glob('Application', "SELECT * FROM shine_applications WHERE id <> '{$app->id}' ORDER BY name");
@@ -161,6 +173,9 @@
 		} 
 	}
 	$available_online_engines = implode(', ', $available_online_engines);
+	
+	$license_types = $app->license_types();
+	$lt_exists = false;
 ?>
 <?PHP include('inc/header.inc.php'); ?>
 
@@ -188,6 +203,21 @@
                                     <input type="text" class="text" name="abbreviation" id="abbreviation" value="<?PHP echo $abbreviation; ?>">
                                     <span class="info">Ex: FOC, COP, WPW</span>
                                 </p>
+                                <p>
+                                    <label for="default_license_abbr">Default license abbreviation</label><br/>
+                                    <select name="default_license_abbr" id="default_license_abbr">
+                                    		<option value="">-- none --</option>
+                                  		<?PHP foreach($license_types as $lt) : ?>
+						<option <?PHP if($default_license_abbr == $lt->abbreviation) { echo 'selected="selected"'; $lt_exists = true; } ?> value="<?PHP echo $lt->abbreviation; ?>"><?PHP echo $lt->abbreviation; ?></option>
+						<?PHP endforeach; ?>
+						
+						<?php if ($default_license_abbr != '' && $lt_exists == false): ?>
+						<option selected="selected" value="<?PHP echo $default_license_abbr; ?>"><?php echo $default_license_abbr.' (DOES NOT EXIST)'; ?></option>
+						<?php endif; ?>
+						
+				    </select><br/>
+                                    <span class="info">(Used by GetDealy)</span>
+                                </p> 
 				<p>
 					<label for="direct_download">Direct Download Type</label><br>
 					<select name="direct_download" id="direct_download">
@@ -211,9 +241,9 @@
                                     <span class="info">Ex: MyApplication.app</span>
                                 </p>
                                 <p>
-                                    <label for="url">MacAppstore Bundle Id</label>
+                                    <label for="url">(MacAppstore) Bundle Id</label>
                                     <input type="text" class="text" name="bundle_id" id="bundle_id" value="<?PHP echo $bundle_id; ?>">
-                                    <span class="info">Get from MacAppstore</span>
+                                    <span class="info">Bundle id for an application like com.mycompany.myproduct</span>
                                 </p>
                                 <p>
                                     <label for="url">i use this URL Key Slug</label>
@@ -381,8 +411,27 @@
                                 </p>  
 
                                 <hr>
+
+                                <h3>GetDealy</h3>
+                                <p>
+                                    <label for="getdealy_name">GetDealy application name</label>
+                                    <input type="text" class="text" name="getdealy_name" value="<?PHP echo $getdealy_name; ?>" id="getdealy_name">
+                                    <span class="info">'app' parameter for license requests</span>
+                                </p>
+                                <p>
+                                    <label for="getdealy_price">Price</label>
+                                    <input type="text" class="text" name="getdealy_price" value="<?PHP echo $getdealy_price; ?>" id="getdealy_price">
+                                    <span class="info">Getdealy price, ex: 9.95</span>
+                                </p>
+
+                                <hr>
 								
 								<h3>Thank-you Email</h3>
+								<p>
+									<input type="checkbox" name="use_postmark" id="use_postmark" value="1" <?PHP echo $use_postmark == 1 ? 'checked="checked"' : ''; ?>>
+									<label for="use_postmark">Use Postmark service (GetDealy only)</label>
+									<span class="info">If checked, emails will be sent with Postmark, otherwise standard 'mail' function will be used.</span>
+								</p>
 								<p>
 									<label for="from_email">From Email</label>
 									<input type="text" class="text" name="from_email" value="<?PHP echo $from_email; ?>" id="from_email">

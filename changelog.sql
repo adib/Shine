@@ -97,3 +97,15 @@ ADD COLUMN `use_ga` TINYINT(1) UNSIGNED NOT NULL,
 ADD COLUMN `ga_key` VARCHAR(100) NOT NULL,
 ADD COLUMN `ga_domain` VARCHAR(100) NOT NULL,
 ADD COLUMN `ga_country` TINYINT(1) UNSIGNED NOT NULL;
+
+
+-- 2012.05.10
+
+ALTER TABLE `shine_orders`
+MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','MacUpdate','GetDealy') CHARACTER SET latin1 NOT NULL;
+
+ALTER TABLE `shine_applications`
+ADD COLUMN `getdealy_name` VARCHAR(128) NOT NULL,
+ADD COLUMN `default_license_abbr` VARCHAR(100) NOT NULL,
+ADD COLUMN `getdealy_price` FLOAT NOT NULL,
+ADD COLUMN `use_postmark` TINYINT(1) UNSIGNED NOT NULL DEFAULT 1;

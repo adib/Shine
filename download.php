@@ -9,6 +9,12 @@ require 'includes/master.inc.php';
 require_once 'includes/class.localupload.php';
 use UnitedPrototype\GoogleAnalytics;
 
+// disable GZIP compression (if it enabled)
+// for correctly detect attachment size in webkit browsers (chrome, safari)
+@ini_set('zlib.output_compression', 0);
+@ini_set('implicit_flush', 1);
+
+
 if (isset($_GET['id'])) {
 	$a = new Application($_GET['id']);
 }

@@ -52,7 +52,7 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 			if (!$a->ok()) {
 				# Check activations count
 				$db = Database::getDatabase();
-				$sql = "SELECT o.id, o.deactivated, o.quantity, COUNT(a.id) AS count
+				$sql = "SELECT o.id, o.deactivated, o.quantity, COUNT(a.id) AS count, o.first_name, o.last_name
 					FROM shine_orders AS o 
 					LEFT JOIN shine_activations AS a ON o.id = a.order_id
 					WHERE o.app_id = ".((int)$app->id)." AND o.serial_number = '".$db->escape($serial)."'";
@@ -66,6 +66,8 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 						$a->dt = dater();
 						$a->ip = $_SERVER['REMOTE_ADDR'];
 						$a->order_id = $row['id'];
+						$a->name = $row['first_name'];
+						$a->name = (!empty($row['first_name']) ? $a->name.' ' : '') . $row['last_name'];
 						$a->insert();
 						
 						if ($app->use_ga == 1) {
@@ -113,7 +115,7 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 				}
 				
 				# Generate license and respond
-				$license = $a->generateLicenseOnline($a->hwid);
+				$license = $a->generateLicenseOnline($a->hwid, $a->name);
 				
 				$response = array(
 					'result' => 1,

@@ -253,12 +253,12 @@
 			return $cache[$this->app_id];
 		}
 
-		public function generateLicenseOnline($hwid)
+		public function generateLicenseOnline($hwid, $customer_name)
 		{
 			$app = new Application($this->app_id);
 			$engine = $app->engine();
 			$engine->order = new Order($this->order_id);
-			return $engine->generateLicenseOnline($hwid);
+			return $engine->generateLicenseOnline($hwid, $customer_name);
 		}
 	}
 

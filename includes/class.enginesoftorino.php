@@ -15,7 +15,7 @@ class EngineSoftorino extends Engine {
 	public function downloadLicense() { }
 	
 	# Online license generation
-	public function generateLicenseOnline($hwid)
+	public function generateLicenseOnline($hwid, $customer_name)
 	{
 		$rand = EngineOnline::generate_uid(20, false);
 		

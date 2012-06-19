@@ -12,8 +12,8 @@
         <li<?PHP if($nav == 'orders') : ?> class="active"<?PHP endif; ?>><a href="orders.php">Orders</a></li>
         <li<?PHP if($nav == 'activations') : ?> class="active"<?PHP endif; ?>><a href="activations.php">Activations</a></li>
         <li<?PHP if($nav == 'feedback') : ?> class="active"<?PHP endif; ?>><a href="feedback.php">Feedback (<?PHP echo $feedback_count; ?>)</a></li>
-        <li<?PHP if($nav == 'tickets') : ?> class="active"<?PHP endif; ?>><a href="tickets.php">Tickets</a></li>
-        <li<?PHP if($nav == 'tweets') : ?> class="active"<?PHP endif; ?>><a href="tweets.php">Tweets (<?PHP echo $tweet_count; ?>)</a></li>
+        <?php /*<li<?PHP if($nav == 'tickets') : ?> class="active"<?PHP endif; ?>><a href="tickets.php">Tickets</a></li>
+        <li<?PHP if($nav == 'tweets') : ?> class="active"<?PHP endif; ?>><a href="tweets.php">Tweets (<?PHP echo $tweet_count; ?>)</a></li>*/?>
         <li<?PHP if($nav == 'stats') : ?> class="active"<?PHP endif; ?>><a href="stats.php">Sparkle Stats</a></li>
         <li<?PHP if($nav == 'inapp-stats') : ?> class="active"<?PHP endif; ?>><a href="inapp-stats.php"><span style="color: <?PHP if($nav == 'inapp-stats') : ?>#5200d0<?PHP else : ?>GreenYellow<?PHP endif; ?>;">In-App Stats</span></a></li>
     </ul>

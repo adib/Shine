@@ -45,6 +45,7 @@ $url = array(
 
 $db = Database::getDatabase();
 $applications = DBObject::glob('Application', 'SELECT * FROM shine_applications ORDER BY name');
+$count = 0;
 
 if (!isset($_GET['tables'])) {
 	$from_date = $url['from_date'];
@@ -97,6 +98,12 @@ if (!isset($_GET['tables'])) {
 		}
 		$stats['rows'][] = $stat_row;
 		$stats2['rows'][] = $stat_row2;
+	}
+	
+	$db->query("SELECT COUNT(*) AS count FROM shine_inapp".(!empty($url['id']) ? " WHERE app_id = ".$url['id'] : ""));
+	if ($db->hasRows()) {
+		$row = $db->getRow();
+		$count = $row['count'];
 	}
 }
 else {

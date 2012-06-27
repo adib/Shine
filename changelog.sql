@@ -115,3 +115,9 @@ ADD COLUMN `use_postmark` TINYINT(1) UNSIGNED NOT NULL DEFAULT 1;
 
 ALTER TABLE `shine_orders`
 MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','MacUpdate','GetDealy','Facebook_like') CHARACTER SET latin1 NOT NULL;
+
+
+-- 2012.06.27
+
+ALTER TABLE `shine_orders`
+MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','MacUpdate','GetDealy','Facebook_like','MacBundler') CHARACTER SET latin1 NOT NULL;

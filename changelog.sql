@@ -121,3 +121,9 @@ MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','Ma
 
 ALTER TABLE `shine_orders`
 MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','MacUpdate','GetDealy','Facebook_like','MacBundler') CHARACTER SET latin1 NOT NULL;
+
+
+-- 2012.08.02
+
+ALTER TABLE `shine_orders`
+MODIFY COLUMN `type` VARCHAR(255) NOT NULL;

@@ -73,7 +73,7 @@ else {
 	if ($id > 0) {
 		$instruction = 'Please, follow these 3 easy steps below to activate your version of Focus:'.PHP_EOL.
 				'- Download and install free version of Focus from our site. (http://coppertino.com/focus/download)'.PHP_EOL.
-				'- Launch Focus, click application icon in Menu bar and select "Activate" item'.PHP_EOL.
+				'- Launch Focus, click "Focus" in Menu bar and select "Activate" item'.PHP_EOL.
 				'- Enter your email and Activation Code into the fields and click "Activate"';
 		echo 'Your activation code - '.$o->serial_number.PHP_EOL.PHP_EOL.$instruction;
 	}

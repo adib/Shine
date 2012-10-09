@@ -1,10 +1,46 @@
 <?PHP
 	require 'includes/master.inc.php';
+	
+	define('LOCAL_UPLOAD_PATH', DOC_ROOT.'/shine_uploads');
+	
 	$Auth->requireAdmin('login.php');
 	$nav = 'applications';
 	
 	$app = new Application($_GET['id']);
 	if(!$app->ok()) redirect('index.php');
+	
+	function syncVersions($app)
+	{
+		$allAppsVersionsList = scandir(LOCAL_UPLOAD_PATH);
+		
+		$versions = $app->versions();
+		$versionsList = array();
+		foreach ($versions as $v)
+		{
+			$versionsList[] = $v->url;
+			$altVersionsList[] = $v->alternate_fname;	
+		}
+		$versionsList = array_unique($versionsList);
+		$altVersionsList = array_unique($altVersionsList);
+		
+		$s3 = new S3($app->s3key, $app->s3pkey);
+		$s3VersionsList = array_keys($s3->getBucketContents($app->s3bucket));
+		
+		$intersect = array_intersect($versionsList, $allAppsVersionsList);
+		$diff = array_diff($intersect, $s3VersionsList);
+		$intersectAlt = array_intersect($altVersionsList, $allAppsVersionsList);
+		$diffList = array_merge($diff, $intersectAlt);
+		
+		foreach ($diffList as $v)
+		{
+			$s3->uploadFile($app->s3bucket, $v, LOCAL_UPLOAD_PATH . "/" . $v, true);
+		}
+	}
+	
+	if (isset($_POST['btnSync']))
+	{
+		syncVersions($app);
+	}
 
 	if(isset($_POST['btnSaveApp']))
 	{
@@ -23,6 +59,8 @@
 			$app->s3pkey            = $_POST['s3pkey'];
 			$app->s3bucket          = $_POST['s3bucket'];
 			$app->s3path            = $_POST['s3path'];
+			$app->s3domain          = $_POST['s3domain'];
+			$app->s3distribution    = $_POST['s3distribution'];
 			$app->sparkle_key       = $_POST['sparkle_key'];
 			$app->sparkle_pkey      = $_POST['sparkle_pkey'];
 			$app->activation_online = $_POST['activation_online'];
@@ -46,6 +84,8 @@
 			$app->upgrade_app_id    = $_POST['upgrade_app_id'];
 			$app->engine_class_name = $_POST['engine_class_name'];
 			$app->direct_download   = $_POST['direct_download'];
+			$app->storage  		 	= $_POST['storage'];
+			$app->is_ssl  		 	= $_POST['is_ssl'];
 			$app->use_ga            = $_POST['use_ga'];
 			$app->ga_key            = $_POST['ga_key'];
 			$app->ga_domain         = $_POST['ga_domain'];
@@ -69,6 +109,8 @@
 			$s3pkey            = $_POST['s3pkey'];
 			$s3bucket          = $_POST['s3bucket'];
 			$s3path            = $_POST['s3path'];
+			$s3domain          = $_POST['s3domain'];
+			$s3distribution    = $_POST['s3distribution'];
 			$sparkle_key       = $_POST['sparkle_key'];
 			$sparkle_pkey      = $_POST['sparkle_pkey'];
 			$activation_online = $_POST['activation_online'];
@@ -92,6 +134,8 @@
 			$upgrade_app_id    = $_POST['upgrade_app_id'];
 			$engine_class_name = $_POST['engine_class_name'];
 			$direct_download   = $_POST['direct_download'];
+			$storage		   = $_POST['storage'];
+			$is_ssl  		   = $_POST['is_ssl'];
 			$use_ga            = $_POST['use_ga'];
 			$ga_key            = $_POST['ga_key'];
 			$ga_domain         = $_POST['ga_domain'];
@@ -103,7 +147,7 @@
 		}
 	}
 	else
-	{
+	{	
 		$abbreviation      = $app->abbreviation;
 		$name              = $app->name;
 		$link              = $app->link;
@@ -114,6 +158,8 @@
 		$s3pkey            = $app->s3pkey;
 		$s3bucket          = $app->s3bucket;
 		$s3path            = $app->s3path;
+		$s3domain          = $app->s3domain;
+		$s3distribution    = $app->s3distribution;
 		$sparkle_key       = $app->sparkle_key;
 		$sparkle_pkey      = $app->sparkle_pkey;
 		$activation_online = $app->activation_online;
@@ -137,6 +183,8 @@
 		$upgrade_app_id    = $app->upgrade_app_id;
 		$engine_class_name = $app->engine_class_name;
 		$direct_download   = $app->direct_download;
+		$storage 		   = $app->storage;
+		$is_ssl			   = $app->is_ssl;
 		$use_ga            = $app->use_ga;
 		$ga_key            = $app->ga_key;
 		$ga_domain         = $app->ga_domain;
@@ -176,6 +224,11 @@
 	
 	$license_types = $app->license_types();
 	$lt_exists = false;
+	
+	if ((0 == $storage || 1 == $storage) && isset($_POST['btnSaveApp']))
+	{
+		syncVersions($app);
+	}
 ?>
 <?PHP include('inc/header.inc.php'); ?>
 
@@ -218,6 +271,19 @@
 				    </select><br/>
                                     <span class="info">(Used by GetDealy)</span>
                                 </p> 
+				<p>
+					<label for="storage">Choose Storage Type</label><br>
+					<select name="storage" id="storage">
+						<option value="0" <?PHP if ($storage == '0') echo 'selected="selected"'; ?>>Amazon S3</option>
+						<option value="1" <?PHP if ($storage == '1') echo 'selected="selected"'; ?>>CloudFront</option>
+						<option value="2" <?PHP if ($storage == '2') echo 'selected="selected"'; ?>>Direct Download</option>
+					</select>
+					<input type="submit" name="btnSync" value="Sync" id="btnSync" />
+					<br/>
+				</p>
+				<p>
+					<input type="checkbox" name="is_ssl" id="is_ssl" value="1" <?PHP if (1 == $is_ssl) echo 'checked="checked"'; ?> >Use SSL</input><br/>
+				</p>	
 				<p>
 					<label for="direct_download">Direct Download Type</label><br>
 					<select name="direct_download" id="direct_download">
@@ -309,6 +375,14 @@
 									<label for="url">Amazon S3 Path</label>
                                     <input type="text" class="text" name="s3path" id="s3path" value="<?PHP echo $s3path; ?>">
 									<span class="info">The directory in your bucket where you downloads will be stored</span>
+                                </p>
+                                <p>
+									<label for="s3domain">Amazon S3 Domain</label>
+                                    <input type="text" class="text" name="s3domain" id="s3domain" value="<?PHP echo $s3domain; ?>">
+                                </p>
+                                <p>
+									<label for="s3distribution">Amazon S3 Distribution ID</label>
+                                    <input type="text" class="text" name="s3distribution" id="s3distribution" value="<?PHP echo $s3distribution; ?>">
                                 </p>
 
 								<hr>

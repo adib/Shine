@@ -81,12 +81,24 @@
 		<link><?PHP echo $app->link; ?></link>
 		<description>Most recent changes with links to updates.</description>
 		<language>en</language>
-		<?PHP foreach($versions as $v) : ?>
+		<?PHP
+			foreach($versions as $v) : 
+				switch ($app->storage)
+				{
+					case 0:
+					case 1:
+						$enclosureLink = (1 == $app->is_ssl ? "https" : "http") . "://" . $app->s3domain . "/" . $app->s3path;
+					break;
+					case 2:
+						$enclosureLink = HTTP_SITE_NAME.'/dl/'.$v->url;
+					break;
+				}
+		?>
 		<item>
 			<title><?PHP echo $app->name; ?> <?PHP echo $v->human_version; ?></title>
 			<description><![CDATA[ <?PHP echo $v->release_notes; ?> ]]></description>
 			<pubDate><?PHP echo dater('D, d M Y H:i:s O', $v->dt); ?></pubDate>
-			<enclosure url="<?PHP echo HTTP_SITE_NAME.'/dl/'.$v->url; ?>" sparkle:shortVersionString="<?PHP echo $v->human_version; ?>" sparkle:version="<?PHP echo $v->version_number; ?>" length="<?PHP echo $v->filesize; ?>" type="application/octet-stream" sparkle:dsaSignature="<?PHP echo $v->signature; ?>" />
+			<enclosure url="<?PHP echo $enclosureLink; ?>" sparkle:shortVersionString="<?PHP echo $v->human_version; ?>" sparkle:version="<?PHP echo $v->version_number; ?>" length="<?PHP echo $v->filesize; ?>" type="application/octet-stream" sparkle:dsaSignature="<?PHP echo $v->signature; ?>" />
 		</item>
 		<?PHP endforeach; ?>
 		<?PHP if($pirate === true) : ?>

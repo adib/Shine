@@ -127,3 +127,8 @@ MODIFY COLUMN `type` enum('PayPal','Manual','Student','MUPromo','FastSpring','Ma
 
 ALTER TABLE `shine_orders`
 MODIFY COLUMN `type` VARCHAR(255) NOT NULL;
+
+
+-- 2012.10.09 Adding S3 and CloudFront support
+
+ALTER TABLE `shine_applications` ADD s3domain VARCHAR(128) NOT NULL, ADD s3distribution VARCHAR(128) NOT NULL, ADD storage TINYINT UNSIGNED NOT NULL, ADD is_ssl TINYINT UNSIGNED NOT NULL;

@@ -1,5 +1,7 @@
 <?PHP
+	require_once 'aws-sdk-for-php/sdk.class.php';
 	require 'includes/master.inc.php';
+	
 	$Auth->requireAdmin('login.php');
 	$nav = 'applications';
 	
@@ -11,7 +13,7 @@
 		$Error->blank($_POST['version_number'], 'Version Number');
 		$Error->blank($_POST['human_version'], 'Human Readable Version Number');
 		$Error->upload($_FILES['file'], 'file');
-		
+	
 		if($Error->ok())
 		{
 			$v = new Version();
@@ -29,13 +31,33 @@
 			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
 			$v->url = $object;
 			chmod($_FILES['file']['tmp_name'], 0755);
-			
-			LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
-			
-			# Amazon S3 file upload
-//			$s3 = new S3($app->s3key, $app->s3pkey);
-//			$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
-			
+
+			$alternate_fname = $v->alternate_fname;
+			switch ($app->storage)
+			{
+				case 1:
+					setCFconfig($app);
+					$cdn = new AmazonCloudFront();
+					$response = $cdn->create_invalidation($app->s3distribution, 'alternate_fname' . time(), $alternate_fname);
+				case 0:
+					# Amazon S3 file upload
+					$s3 = new S3($app->s3key, $app->s3pkey);
+					$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+
+					if (!empty($alternate_fname))
+					{
+						$s3 = new S3($app->s3key, $app->s3pkey);
+						$s3->uploadFile($app->s3bucket, $v->alternate_fname, $_FILES['file']['tmp_name'], true);
+					}				
+				case 2:
+					LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
+					if (!empty($alternate_fname))
+					{
+						copy(LOCAL_UPLOAD_PATH.'/'.$object, LOCAL_UPLOAD_PATH.'/'.$alternate_fname);
+					}
+				break;
+			}
+
 			$v->insert();
 
 			redirect('versions.php?id=' . $app->id);
@@ -54,6 +76,47 @@
 		$human_version  = '';
 		$release_notes  = '';
 		$alternate_fname = '';
+	}
+	
+	/**
+	 * Create a list of credential sets that can be used with the SDK.
+	 */
+	function setCFconfig($app)
+	{
+		CFCredentials::set(array(
+		
+			// Credentials for the development environment.
+			'development' => array(
+		
+				// Amazon Web Services Key. Found in the AWS Security Credentials. You can also pass
+				// this value as the first parameter to a service constructor.
+				'key' => $app->s3key,
+		
+				// Amazon Web Services Secret Key. Found in the AWS Security Credentials. You can also
+				// pass this value as the second parameter to a service constructor.
+				'secret' => $app->s3pkey,
+		
+				// This option allows you to configure a preferred storage type to use for caching by
+				// default. This can be changed later using the set_cache_config() method.
+				//
+				// Valid values are: `apc`, `xcache`, or a file system path such as `./cache` or
+				// `/tmp/cache/`.
+				'default_cache_config' => '',
+		
+				// Determines which Cerificate Authority file to use.
+				//
+				// A value of boolean `false` will use the Certificate Authority file available on the
+				// system. A value of boolean `true` will use the Certificate Authority provided by the
+				// SDK. Passing a file system path to a Certificate Authority file (chmodded to `0755`)
+				// will use that.
+				//
+				// Leave this set to `false` if you're not sure.
+				'certificate_authority' => false
+			),
+		
+			// Specify a default credential set to use if there are more than one.
+			'@default' => 'development'
+		));
 	}
 	
 	// It would be better to use PHP's native OpenSSL extension

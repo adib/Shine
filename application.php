@@ -1,4 +1,5 @@
 <?PHP
+	require_once 'aws-sdk-for-php/sdk.class.php';
 	require 'includes/master.inc.php';
 	
 	define('LOCAL_UPLOAD_PATH', dirname(DOC_ROOT).'/shine_uploads');
@@ -11,8 +12,8 @@
 	
 	function syncVersions($app)
 	{
+		setCFconfig($app);
 		$allAppsVersionsList = scandir(LOCAL_UPLOAD_PATH);
-		
 		$versions = $app->versions();
 		$versionsList = array();
 		foreach ($versions as $v)
@@ -23,23 +24,45 @@
 		$versionsList = array_unique($versionsList);
 		$altVersionsList = array_unique($altVersionsList);
 		
-		$s3 = new S3($app->s3key, $app->s3pkey);
-		$s3VersionsList = array_keys($s3->getBucketContents($app->s3bucket));
+		$s3 = new AmazonS3();
 		
+		$regExpPath = "/^(".preg_quote($app->s3path,'/').")/";
+		$s3VersionsList = $s3->get_object_list($app->s3bucket, array('pcre' => $regExpPath));
+
+		foreach ($s3VersionsList as $key=>$value) {
+			$s3VersionsList[$key] = preg_replace($regExpPath, '', $s3VersionsList[$key]);
+		}
+
 		$intersect = array_intersect($versionsList, $allAppsVersionsList);
 		$diff = array_diff($intersect, $s3VersionsList);
+
 		$intersectAlt = array_intersect($altVersionsList, $allAppsVersionsList);
 		$diffList = array_merge($diff, $intersectAlt);
-		
+
+		$uploadS3result = true;
+
 		foreach ($diffList as $v)
 		{
-			$s3->uploadFile($app->s3bucket, $v, LOCAL_UPLOAD_PATH . "/" . $v, true);
+			$file_resource = fopen(LOCAL_UPLOAD_PATH . "/" . $v, 'r');
+            $opt = array(
+                    'fileUpload'	=> $file_resource,
+                    'acl'			=> AmazonS3::ACL_PUBLIC
+            );
+            $path = str_replace('//', '/', $app->s3path.'/'.$v);
+            $response = $s3->create_object($app->s3bucket, $path, $opt);
+            $uploadS3result &= $response->isOK();
 		}
+		
+		return $uploadS3result;
 	}
 	
 	if (isset($_POST['btnSync']))
 	{
-		syncVersions($app);
+		if (!syncVersions($app))
+		{
+			$Error->add('sync', 'Could not sync files!');
+			$Error->alert();
+		}
 	}
 
 	if(isset($_POST['btnSaveApp']))
@@ -95,6 +118,16 @@
 			$app->getdealy_price    = $_POST['getdealy_price'];
 			$app->use_postmark      = $_POST['use_postmark'];
 			$app->update();
+			
+			if (0 == $storage || 1 == $storage)
+			{
+				if (!syncVersions($app))
+				{
+					$Error->add('sync', 'Could not sync files!');
+					$Error->alert();
+				}
+			}
+			
 			redirect('application.php?id=' . $app->id);
 		}
 		else
@@ -224,11 +257,6 @@
 	
 	$license_types = $app->license_types();
 	$lt_exists = false;
-	
-	if ((0 == $storage || 1 == $storage) && isset($_POST['btnSaveApp']))
-	{
-		syncVersions($app);
-	}
 ?>
 <?PHP include('inc/header.inc.php'); ?>
 

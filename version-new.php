@@ -33,6 +33,7 @@
 			chmod($_FILES['file']['tmp_name'], 0755);
 
 			$alternate_fname = $v->alternate_fname;
+			$uploadS3result = true;
 			switch ($app->storage)
 			{
 				case 1:
@@ -40,14 +41,37 @@
 					$cdn = new AmazonCloudFront();
 					$response = $cdn->create_invalidation($app->s3distribution, 'alternate_fname' . time(), $alternate_fname);
 				case 0:
+				/*
 					# Amazon S3 file upload
 					$s3 = new S3($app->s3key, $app->s3pkey);
-					$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+					$uploadS3result = $s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+				*/
+					$s3 = new AmazonS3();
+					$file_resource = fopen($_FILES['file']['tmp_name'], 'r');
 
+	                $opt = array(
+	                        'fileUpload'	=> $file_resource,
+	                        'acl'			=> AmazonS3::ACL_PUBLIC
+	                );
+	                
+	                $path = str_replace('//', '/', $app->s3path.'/'.$object);
+	                $response = $s3->create_object($app->s3bucket, $path, $opt);
+
+	                $uploadS3result = $response->isOK();
+					
 					if (!empty($alternate_fname))
 					{
-						$s3 = new S3($app->s3key, $app->s3pkey);
-						$s3->uploadFile($app->s3bucket, $v->alternate_fname, $_FILES['file']['tmp_name'], true);
+						$file_resource = fopen($_FILES['file']['tmp_name'], 'r');
+	
+		                $opt = array(
+		                        'fileUpload'	=> $file_resource,
+		                        'acl'			=> AmazonS3::ACL_PUBLIC
+		                );
+		                
+		                $path = str_replace('//', '/', $app->s3path.'/'.$object);
+		                $response = $s3->create_object($app->s3bucket, $path, $opt);
+
+		                $uploadS3result &= $response->isOK();
 					}				
 				case 2:
 					LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
@@ -59,8 +83,18 @@
 			}
 
 			$v->insert();
-
-			redirect('versions.php?id=' . $app->id);
+			
+			if (!$uploadS3result){
+				$Error->add('uploadS3', 'Could not upload file(s) to AmazonS3!');
+				$Error->alert();
+				
+				$version_number = $_POST['version_number'];
+				$human_version  = $_POST['human_version'];
+				$release_notes  = $_POST['release_notes'];
+				$alternate_fname  = $_POST['alternate_fname'];
+			}else {
+				redirect('versions.php?id=' . $app->id);
+			}
 		}
 		else
 		{
@@ -77,48 +111,7 @@
 		$release_notes  = '';
 		$alternate_fname = '';
 	}
-	
-	/**
-	 * Create a list of credential sets that can be used with the SDK.
-	 */
-	function setCFconfig($app)
-	{
-		CFCredentials::set(array(
 		
-			// Credentials for the development environment.
-			'development' => array(
-		
-				// Amazon Web Services Key. Found in the AWS Security Credentials. You can also pass
-				// this value as the first parameter to a service constructor.
-				'key' => $app->s3key,
-		
-				// Amazon Web Services Secret Key. Found in the AWS Security Credentials. You can also
-				// pass this value as the second parameter to a service constructor.
-				'secret' => $app->s3pkey,
-		
-				// This option allows you to configure a preferred storage type to use for caching by
-				// default. This can be changed later using the set_cache_config() method.
-				//
-				// Valid values are: `apc`, `xcache`, or a file system path such as `./cache` or
-				// `/tmp/cache/`.
-				'default_cache_config' => '',
-		
-				// Determines which Cerificate Authority file to use.
-				//
-				// A value of boolean `false` will use the Certificate Authority file available on the
-				// system. A value of boolean `true` will use the Certificate Authority provided by the
-				// SDK. Passing a file system path to a Certificate Authority file (chmodded to `0755`)
-				// will use that.
-				//
-				// Leave this set to `false` if you're not sure.
-				'certificate_authority' => false
-			),
-		
-			// Specify a default credential set to use if there are more than one.
-			'@default' => 'development'
-		));
-	}
-	
 	// It would be better to use PHP's native OpenSSL extension
 	// but it's PHP 5.3+ only. Too early to force that requirement
 	// upon users.

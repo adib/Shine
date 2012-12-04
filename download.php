@@ -81,33 +81,43 @@ if ($a->ok()) {
 		
 		$fname = $v->alternate_fname;
 		
-		header('Content-Description: File Transfer');
-		header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . (!empty($fname) ? $fname : $v->url))."\"");
-		header("Content-Type: application/octet-stream");
-		header('Content-Transfer-Encoding: binary');
-		
-		# Webserver file download
-		if ($a->direct_download == '1') {
-			$server = 'lighttpd';
-			if (!empty($_SERVER['SERVER_SOFTWARE']) && stripos($_SERVER['SERVER_SOFTWARE'], 'apache') !== false) $server = 'apache';
-			else if (!empty($_SERVER['SERVER_SOFTWARE']) && stripos($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false) $server = 'nginx';
+		if (2 == $a->storage)
+		{
+			header('Content-Description: File Transfer');
+			header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . (!empty($fname) ? $fname : $v->url))."\"");
+			header("Content-Type: application/octet-stream");
+			header('Content-Transfer-Encoding: binary');
 			
-			switch ($server) {
-				case 'lighttpd':
-					header("X-LIGHTTPD-send-file: " . LOCAL_UPLOAD_PATH . '/' . $v->url);
-					break;
-				case 'apache':
-					header("X-Sendfile: " . LOCAL_UPLOAD_PATH . '/' . $v->url);
-					break;
-				case 'nginx':
-					header("X-Accel-Redirect: " . LOCAL_UPLOAD_PATH . '/' . $v->url);
-					break;
+			# Webserver file download
+			if ($a->direct_download == '1') {
+				$server = 'lighttpd';
+				if (!empty($_SERVER['SERVER_SOFTWARE']) && stripos($_SERVER['SERVER_SOFTWARE'], 'apache') !== false) $server = 'apache';
+				else if (!empty($_SERVER['SERVER_SOFTWARE']) && stripos($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false) $server = 'nginx';
+				
+				switch ($server) {
+					case 'lighttpd':
+						header("X-LIGHTTPD-send-file: " . LOCAL_UPLOAD_PATH . '/' . $v->url);
+						break;
+					case 'apache':
+						header("X-Sendfile: " . LOCAL_UPLOAD_PATH . '/' . $v->url);
+						break;
+					case 'nginx':
+						header("X-Accel-Redirect: " . LOCAL_UPLOAD_PATH . '/' . $v->url);
+						break;
+				}
+			}
+			# Simple readfile
+			else {
+				header('Content-Length: ' . (string)filesize(LOCAL_UPLOAD_PATH . '/' . $v->url));
+				readfile(LOCAL_UPLOAD_PATH . '/' . $v->url);
 			}
 		}
-		# Simple readfile
-		else {
-			header('Content-Length: ' . (string)filesize(LOCAL_UPLOAD_PATH . '/' . $v->url));
-			readfile(LOCAL_UPLOAD_PATH . '/' . $v->url);
+		else
+		{
+			$url = (1 == $a->is_ssl ? "https" : "http") . "://" . $a->s3domain . "/";
+			$url .= !empty($a->s3path) ? $a->s3path . "/" : "";
+			$url .= $v->url;
+			header("Location: " . $url);
 		}
 		exit;
 	}

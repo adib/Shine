@@ -1,5 +1,7 @@
 <?PHP
+	require_once 'aws-sdk-for-php/sdk.class.php';
 	require 'includes/master.inc.php';
+	
 	$Auth->requireAdmin('login.php');
 	$nav = 'applications';
 	
@@ -11,7 +13,7 @@
 		$Error->blank($_POST['version_number'], 'Version Number');
 		$Error->blank($_POST['human_version'], 'Human Readable Version Number');
 		$Error->upload($_FILES['file'], 'file');
-		
+	
 		if($Error->ok())
 		{
 			$v = new Version();
@@ -29,16 +31,70 @@
 			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
 			$v->url = $object;
 			chmod($_FILES['file']['tmp_name'], 0755);
-			
-			LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
-			
-			# Amazon S3 file upload
-//			$s3 = new S3($app->s3key, $app->s3pkey);
-//			$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
-			
-			$v->insert();
 
-			redirect('versions.php?id=' . $app->id);
+			$alternate_fname = $v->alternate_fname;
+			$uploadS3result = true;
+			switch ($app->storage)
+			{
+				case 1:
+					setCFconfig($app);
+					$cdn = new AmazonCloudFront();
+					$response = $cdn->create_invalidation($app->s3distribution, 'alternate_fname' . time(), $alternate_fname);
+				case 0:
+				/*
+					# Amazon S3 file upload
+					$s3 = new S3($app->s3key, $app->s3pkey);
+					$uploadS3result = $s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+				*/
+					$s3 = new AmazonS3();
+					$file_resource = fopen($_FILES['file']['tmp_name'], 'r');
+
+	                $opt = array(
+	                        'fileUpload'	=> $file_resource,
+	                        'acl'			=> AmazonS3::ACL_PUBLIC
+	                );
+	                
+	                $path = str_replace('//', '/', $app->s3path.'/'.$object);
+	                $response = $s3->create_object($app->s3bucket, $path, $opt);
+
+	                $uploadS3result = $response->isOK();
+					
+					if (!empty($alternate_fname))
+					{
+						$file_resource = fopen($_FILES['file']['tmp_name'], 'r');
+	
+		                $opt = array(
+		                        'fileUpload'	=> $file_resource,
+		                        'acl'			=> AmazonS3::ACL_PUBLIC
+		                );
+		                
+		                $path = str_replace('//', '/', $app->s3path.'/'.$object);
+		                $response = $s3->create_object($app->s3bucket, $path, $opt);
+
+		                $uploadS3result &= $response->isOK();
+					}				
+				case 2:
+					LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
+					if (!empty($alternate_fname))
+					{
+						copy(LOCAL_UPLOAD_PATH.'/'.$object, LOCAL_UPLOAD_PATH.'/'.$alternate_fname);
+					}
+				break;
+			}
+
+			$v->insert();
+			
+			if (!$uploadS3result){
+				$Error->add('uploadS3', 'Could not upload file(s) to AmazonS3!');
+				$Error->alert();
+				
+				$version_number = $_POST['version_number'];
+				$human_version  = $_POST['human_version'];
+				$release_notes  = $_POST['release_notes'];
+				$alternate_fname  = $_POST['alternate_fname'];
+			}else {
+				redirect('versions.php?id=' . $app->id);
+			}
 		}
 		else
 		{
@@ -55,7 +111,7 @@
 		$release_notes  = '';
 		$alternate_fname = '';
 	}
-	
+		
 	// It would be better to use PHP's native OpenSSL extension
 	// but it's PHP 5.3+ only. Too early to force that requirement
 	// upon users.

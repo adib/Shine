@@ -1,5 +1,5 @@
 <?php
-$_SERVER['HTTP_HOST'] = 'shine.egordienko.devbox';
+$_SERVER['HTTP_HOST'] = 'admin.softorino.com';
 require realpath(dirname(__FILE__).'/../includes/master.inc.php');
 $db = Database::getDatabase();
 $downloads = $db->getRows("SELECT url FROM shine_downloads WHERE app_id=0 GROUP BY url");

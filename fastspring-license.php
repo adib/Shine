@@ -60,5 +60,5 @@ $o->load(array('serial_number' => implode(',', $serials)));
 $id = $o->save();
 
 # Return serial number
-	if ($id > 0) echo implode(',', $serials);
+	if ($id > 0) echo implode('\n', $serials);
 	else echo 'Order already exists. Security violation';

@@ -137,3 +137,7 @@ ALTER TABLE `shine_applications` ADD s3domain VARCHAR(128) NOT NULL, ADD s3distr
 
 ALTER TABLE `shine_downloads` ADD COLUMN app_id INT(10) UNSIGNED NOT NULL;
 ALTER TABLE `shine_license_types` ADD COLUMN number_lines INT(10) UNSIGNED NOT NULL DEFAULT 1;
+
+-- 2013.01.25 rename one field
+
+ALTER TABLE `shine_license_types` CHANGE number_lines serials_quantity INT(10)

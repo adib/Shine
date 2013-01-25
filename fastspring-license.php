@@ -31,7 +31,7 @@ $o = new Order();
 $o->app_id = $app->id;
 $o->txn_id = $_POST['reference'];
 $o->payer_email = $_POST['email'];
-$o->quantity = $lt->quantity;
+$o->quantity = $lt->quantity * $lt->serials_quantity;
 $ed = $lt->expiration_days;
 if (!empty($ed)) $o->expiration_date = date('Y-m-d', time()+$ed*86400);
 $o->license_type_id = $lt->id;
@@ -53,12 +53,12 @@ $serials = array();
 
 for ($i = 0; $i < $lt->serials_quantity; $i++) {
 	$o->generateSerial(); # generates serial into $o->serial_number	
-	$id = $o->insert();
-	
-	# Return serial number
-	if ($id > 0) $serials[] = $o->serial_number;
-	else $error = 'Order already exists. Security violation';
+	$serials[] = $o->serial_number;
 }
 
-if (!empty($error)) echo $error;
-else echo implode(',', $serials);
+$o->load(array('serial_number' => implode(',', $serials)));
+$id = $o->save();
+
+# Return serial number
+	if ($id > 0) echo implode(',', $serials);
+	else echo 'Order already exists. Security violation';

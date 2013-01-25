@@ -268,6 +268,94 @@
         {
             parent::__construct('shine_orders', array('app_id', 'dt', 'txn_type', 'first_name', 'last_name', 'residence_country', 'item_name', 'payment_gross', 'mc_currency', 'business', 'payment_type', 'verify_sign', 'payer_status', 'tax', 'payer_email', 'txn_id', 'quantity', 'receiver_email', 'payer_id', 'receiver_id', 'item_number', 'payment_status', 'payment_fee', 'mc_fee', 'shipping', 'mc_gross', 'custom', 'license', 'type', 'deleted', 'hash', 'claimed', 'serial_number', 'notes', 'upgrade_coupon', 'deactivated', 'expiration_date', 'license_type_id'), $id);
         }
+        
+        public function select($id, $column = null)
+        {
+            $db = Database::getDatabase();
+
+            if(is_null($column)) $column = $this->idColumnName;
+            $column = $db->escape($column);
+
+            $db->query("SELECT * FROM `{$this->tableName}` WHERE `$column` = :id LIMIT 1", array('id' => $id));
+            if($db->hasRows())
+            {
+                $row = $db->getRow();
+                $this->load($row);
+                
+                $serials = DBObject::glob('SerialNumber', 'SELECT id, serial_number FROM shine_serial_numbers WHERE order_id='.$id.'');
+                
+                $serial_numbers = array();
+                foreach ($serials as $serial) {
+	                $serial_numbers[] = $serial->serial_number;
+                }
+                
+                if (!empty($serial_numbers)) {
+	               $this->serial_number = implode(', ', $serial_numbers);
+                }
+                        
+                return true;
+            }
+
+            return false;
+        }
+
+        public function selectMultiple($params)
+        {
+            if (!empty($params)) {
+	            $db = Database::getDatabase();
+	
+	            $where = array();
+	            foreach ($params as $col => $val) {
+	                $where[] = "`".$db->escape($col)."` = '".$db->escape($val)."'";
+	            }
+	
+	            $db->query("SELECT * FROM `{$this->tableName}` WHERE ".implode(' AND ', $where))." LIMIT 1";
+	            if($db->hasRows())
+	            {
+	                $row = $db->getRow();
+	                $this->load($row);
+	                
+	                $serials = DBObject::glob('SerialNumber', 'SELECT id, serial_number FROM shine_serial_numbers WHERE order_id='.$id.'');
+	                
+	                $serial_numbers = array();
+	                foreach ($serials as $serial) {
+		                $serial_numbers[] = $serial->serial_number;
+	                }
+	                
+	                if (!empty($serial_numbers)) {
+		               $this->serial_number = implode(', ', $serial_numbers);
+	                }
+	                 
+	                return true;
+	            }
+            }
+
+            return false;
+        }
+        
+        public function save()
+        {
+        	$serials = explode(',', $this->serial_number);
+        	$this->serial_number = '';
+        	
+            if(is_null($this->id))
+                $this->insert();
+            else
+                $this->update();
+        	
+        	$sn = new SerialNumber();
+        	foreach ($serials as $serial) {
+	        	$sn->load(array(
+	        		'id' => null,
+	        		'order_id' => $this->id,
+	        		'serial_number' => $serial
+	        	));
+
+	        	$sn->save();
+        	}
+        	
+        	return $this->id;
+        }
 
 		public function activationCount()
 		{
@@ -381,6 +469,14 @@
         public function __construct($id = null)
         {
             parent::__construct('shine_license_types', array('app_id', 'abbreviation', 'quantity', 'expiration_days', 'max_update_version', 'serials_quantity'), $id);
+        }
+    }
+
+    class SerialNumber extends DBObject
+    {
+        public function __construct($id = null)
+        {
+            parent::__construct('shine_serial_numbers', array('order_id', 'serial_number'), $id);
         }
     }
 

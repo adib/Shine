@@ -56,7 +56,7 @@ if (!empty($_POST['data']) && !empty($_POST['bundle_id'])) {
 					FROM shine_orders AS o 
 					LEFT JOIN shine_activations AS a ON o.id = a.order_id
 					LEFT JOIN shine_serial_numbers AS sn ON o.id=sn.order_id
-					WHERE o.app_id = ".((int)$app->id)." AND (sn.serial_number = '".$db->escape($serial)."' OR o.serial_number = '".$db->escape($serial)."')";
+					WHERE o.app_id = ".((int)$app->id)." AND sn.serial_number = '".$db->escape($serial)."'";
 				if ($db->query($sql) && $db->hasRows()) {
 					$row = $db->getRow();
 					if ($row['quantity'] > 0 && $row['deactivated'] == 0 && $row['quantity'] > $row['count']) {

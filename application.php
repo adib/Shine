@@ -2,7 +2,11 @@
 	require_once 'aws-sdk-for-php/sdk.class.php';
 	require 'includes/master.inc.php';
 	
+<<<<<<< HEAD
 	define('LOCAL_UPLOAD_PATH', DOC_ROOT.'/shine_uploads');
+=======
+	define('LOCAL_UPLOAD_PATH', dirname(DOC_ROOT).'/shine_uploads');
+>>>>>>> 4225000cf7c7053a2edd63c631824b882bf6b706
 	
 	$Auth->requireAdmin('login.php');
 	$nav = 'applications';

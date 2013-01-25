@@ -134,7 +134,7 @@ $(function(){
 		else in_data.act = 'edit';
 		
 		$(this).parent().siblings().children('input').each(function(){
-			in_data[$(this).attr('name')] = $(this).attr('value');
+			in_data[$(this).attr('name')] = $(this).val();
 		});
 		$.get(document.location, in_data, function(data){
 			if (data && data == 'OK') window.location.reload();

@@ -132,3 +132,8 @@ MODIFY COLUMN `type` VARCHAR(255) NOT NULL;
 -- 2012.10.09 Adding S3 and CloudFront support
 
 ALTER TABLE `shine_applications` ADD s3domain VARCHAR(128) NOT NULL, ADD s3distribution VARCHAR(128) NOT NULL, ADD storage TINYINT UNSIGNED NOT NULL, ADD is_ssl TINYINT UNSIGNED NOT NULL;
+
+-- 2013.01.25 ability to create several serials per license; charts;
+
+ALTER TABLE `shine_downloads` ADD COLUMN app_id INT(10) UNSIGNED NOT NULL;
+ALTER TABLE `shine_license_types` ADD COLUMN number_lines INT(10) UNSIGNED NOT NULL DEFAULT 1;

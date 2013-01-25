@@ -81,12 +81,7 @@ if ($a->ok()) {
 		
 		$fname = $v->alternate_fname;
 		
-<<<<<<< HEAD
-		if (2 == $a->storage)
-		{
-=======
 		if ($a->storage == 2) {
->>>>>>> 4225000cf7c7053a2edd63c631824b882bf6b706
 			header('Content-Description: File Transfer');
 			header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . (!empty($fname) ? $fname : $v->url))."\"");
 			header("Content-Type: application/octet-stream");
@@ -116,17 +111,7 @@ if ($a->ok()) {
 				readfile(LOCAL_UPLOAD_PATH . '/' . $v->url);
 			}
 		}
-<<<<<<< HEAD
-		else
-		{
-			$url = (1 == $a->is_ssl ? "https" : "http") . "://" . $a->s3domain . "/";
-			$url .= !empty($a->s3path) ? $a->s3path . "/" : "";
-			$url .= $v->url;
-			header("Location: " . $url);
-		}
-=======
 		else header('Location: http'.($a->is_ssl == 1 ? 's' : '').'://'.$a->s3domain.'/'.$a->s3path.$v->url);
->>>>>>> 4225000cf7c7053a2edd63c631824b882bf6b706
 		exit;
 	}
 }

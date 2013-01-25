@@ -380,7 +380,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_license_types', array('app_id', 'abbreviation', 'quantity', 'expiration_days', 'max_update_version'), $id);
+            parent::__construct('shine_license_types', array('app_id', 'abbreviation', 'quantity', 'expiration_days', 'max_update_version', 'serials_quantity'), $id);
         }
     }
 

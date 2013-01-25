@@ -37,7 +37,6 @@ if (!empty($ed)) $o->expiration_date = date('Y-m-d', time()+$ed*86400);
 $o->license_type_id = $lt->id;
 $o->dt = dater();
 $o->type = 'FastSpring';
-$o->generateSerial(); # generates serial into $o->serial_number
 
 # Getting name
 if (!empty($_POST['name'])) {
@@ -49,8 +48,17 @@ if (!empty($_POST['name'])) {
 	else $o->last_name = $name[0];
 }
 
-$id = $o->insert();
+$error = '';
+$serials = array();
 
-# Return serial number
-if ($id > 0) echo $o->serial_number;
-else 'Order already exists. Security violation';
+for ($i = 0; $i < $lt->serials_quantity; $i++) {
+	$o->generateSerial(); # generates serial into $o->serial_number	
+	$id = $o->insert();
+	
+	# Return serial number
+	if ($id > 0) $serials[] = $o->serial_number;
+	else $error = 'Order already exists. Security violation';
+}
+
+if (!empty($error)) echo $error;
+else echo implode(',', $serials);

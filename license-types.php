@@ -21,6 +21,7 @@ if (!empty($_REQUEST['act'])) {
 				$lt->app_id = $app->id;
 				$lt->abbreviation = $_REQUEST['abbreviation'];
 				$lt->quantity = (int)$_REQUEST['quantity'];
+				$lt->serials_quantity = (int)$_REQUEST['serials_quantity'];
 				$lt->expiration_days = (int)$_REQUEST['expiration_days'];
 				$lt->max_update_version = $_REQUEST['max_update_version'];
 				
@@ -65,6 +66,7 @@ include('inc/header.inc.php');
 									<tr>
 										<th>Abbreviation</th>
 										<th>Activations quantity</th>
+										<th>Serials quantity</th>
 										<th>Expiration days</th>
 										<th>Max update version</th>
 										<th></th>
@@ -82,6 +84,10 @@ include('inc/header.inc.php');
 										<td>
 											<span class="show_lt"><?php echo $lt->quantity; ?></span>
 											<input class="show_lt hid" type="number" min="0" max="10000" name="quantity" value="<?php echo $lt->quantity; ?>">
+										</td>
+										<td>
+											<span class="show_lt"><?php echo $lt->serials_quantity; ?></span>
+											<input class="show_lt hid" type="number" min="0" max="10000" name="serials_quantity" value="<?php echo $lt->serials_quantity; ?>">
 										</td>
 										<td>
 											<span class="show_lt"><?php $val = $lt->expiration_days; echo !empty($val) ? $val : 'Lifetime'; ?></span>
@@ -104,6 +110,7 @@ include('inc/header.inc.php');
 									<tr>
 										<td><input type="text" maxlength="100" name="abbreviation" id="abbreviation"></td>
 										<td><input type="number" min="1" max="10000" name="quantity" id="quantity" value="1"></td>
+										<td><input type="number" min="1" max="10000" name="serials_quantity" id="serials_quantity" value="1"></td>
 										<td><input type="number" min="0" name="expiration_days" id="expiration_days" value="0"></td>
 										<td><input type="text" maxlength="255" name="max_update_version" id="max_update_version"></td>
 										<td><a class="add_lt" href="#">Add new</a></td>

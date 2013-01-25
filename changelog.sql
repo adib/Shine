@@ -141,3 +141,11 @@ ALTER TABLE `shine_license_types` ADD COLUMN number_lines INT(10) UNSIGNED NOT N
 -- 2013.01.25 rename one field
 
 ALTER TABLE `shine_license_types` CHANGE number_lines serials_quantity INT(10)
+
+-- 2013.01.25 new entity - serial numbers
+
+CREATE TABLE `shine_serial_numbers` (
+	`id` INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	`order_id` INT(11) NOT NULL,
+	`serial_number` VARCHAR(255) NOT NULL
+)

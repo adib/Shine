@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
     <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
 	<script src="http://code.jquery.com/jquery.min.js" type="text/javascript"></script>
-	<script src="js/highcharts.src.js" type="text/javascript"></script>
+	<script src="http://code.highcharts.com/highcharts.js" type="text/javascript"></script>
 </head>
 <body class="rounded">
     <div id="doc3" class="yui-t6">

@@ -1,7 +1,6 @@
 <?PHP
 
-#define('LOCAL_UPLOAD_PATH', dirname(DOC_ROOT).'/shine_uploads');
-define('LOCAL_UPLOAD_PATH', DOC_ROOT.'/shine_uploads');					//changed by egordienko on 5 Oct 2012
+define('LOCAL_UPLOAD_PATH', dirname(DOC_ROOT).'/shine_uploads');
 
 class LocalUpload {
 	public static function uploadFile($fs_path, $name) {

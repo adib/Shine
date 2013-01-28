@@ -83,7 +83,7 @@ if ($a->ok()) {
 		
 		if ($a->storage == 2) {
 			header('Content-Description: File Transfer');
-			header("Content-Disposition: attachment; filename=\"".basename(LOCAL_UPLOAD_PATH . '/' . (!empty($fname) ? $fname : $v->url))."\"");
+			header("Content-Disposition: attachment; filename=\"".basename((!empty($fname) ? $fname : $v->url))."\"");
 			header("Content-Type: application/octet-stream");
 			header('Content-Transfer-Encoding: binary');
 			

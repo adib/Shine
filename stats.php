@@ -14,9 +14,9 @@
 	$chart_app_activity->yAxisTitle  = '# Sparkle Updates';
 	$chart_app_activity->xColumnName = 'ywdt';
 	$chart_app_activity->yColumnName = 'cnt';
-	$where = (isset($_GET['id'])) ? " AND app.id='" . $_GET['id'] . "' " : "";
-	$chart_app_activity->query        = 'SELECT COUNT(*) as cnt, YEARWEEK(dt) as ywdt FROM `shine_sparkle_reports` rep WHERE DATE_ADD(dt, INTERVAL 16 WEEK) >= NOW() GROUP BY ywdt ORDER BY ywdt ASC';
-	$chart_app_activity->query_unique = 'SELECT COUNT(DISTINCT CONCAT(DATE_FORMAT(dt,"%Y%m%d"), ip)) as cnt, YEARWEEK(dt) as ywdt FROM `shine_sparkle_reports` rep WHERE DATE_ADD(dt, INTERVAL 16 WEEK) >= NOW() GROUP BY ywdt ORDER BY ywdt ASC';
+	$where = (isset($_GET['id'])) ? " AND app_id='" . $_GET['id'] . "' " : "";
+	$chart_app_activity->query        = 'SELECT COUNT(*) as cnt, YEARWEEK(dt, 3) as ywdt FROM `shine_sparkle_reports` rep WHERE DATE_ADD(dt, INTERVAL 16 WEEK) >= NOW() '.$where.' GROUP BY ywdt ORDER BY ywdt ASC';
+	$chart_app_activity->query_unique = 'SELECT COUNT(DISTINCT CONCAT(DATE_FORMAT(dt,"%Y%m%d"), ip)) as cnt, YEARWEEK(dt, 3) as ywdt FROM `shine_sparkle_reports` rep WHERE DATE_ADD(dt, INTERVAL 16 WEEK) >= NOW() '.$where.' GROUP BY ywdt ORDER BY ywdt ASC';
 
 
 	Class Chart
@@ -34,15 +34,15 @@
 
 		private $data;
 
-		private function getSunday($week, $year=""){
+		private function getWeekStart($week, $year=""){
 			$first_date = strtotime("1 january ".($year ? $year : date("Y")));
-			if(date("D", $first_date)=="Sun") {
-				$sunday = $first_date;
+			if(date("D", $first_date)=="Mon") {
+				$weekStart = $first_date;
 			} else {
-				$sunday = strtotime("next Sunday", $first_date)-604800;
+				$weekStart = strtotime("next Monday", $first_date)-604800;
 			}
 			$plus_week = "+".($week-1)." week";
-			return strtotime($plus_week, $sunday);
+			return strtotime($plus_week, $weekStart);
 		}
 		
 		public function run()
@@ -75,11 +75,11 @@
 				'unique' => array()
 			);
 			for ($i=15; $i>=0; $i--) {
-				$nextWeek = date('YW', strtotime('-'.$i.' week', time()));
-				$year = date('Y', strtotime('-'.$i.' week', time()));
+				$nextWeek = date('oW', strtotime('-'.$i.' week', time()));
+				$year = date('o', strtotime('-'.$i.' week', time()));
 				$week = date('W', strtotime('-'.$i.' week', time()));
-				$sunday = $this->getSunday($week, $year);
-				$key = date("M d", $sunday) . " - " . date("M d", strtotime("+6 days", $sunday));
+				$weekStart = $this->getWeekStart($week, $year);
+				$key = date("M d", $weekStart) . " - " . date("M d", strtotime("+6 days", $weekStart));
 				$this->data['all'][$key] = (isset($stats['all'][$nextWeek])) ? $stats['all'][$nextWeek] : 0;
 				$this->data['unique'][$key] = (isset($stats['unique'][$nextWeek])) ? $stats['unique'][$nextWeek] : 0;
 			}
@@ -181,7 +181,7 @@
 
 					<div class="block" style="float:left;margin-right:2em;width:100%;">
 						<div class="hd">
-							<h2>OS Version</h2>
+							<h2>App activity chart</h2>
 						</div>
 						<div class="bd">
 							<div id="chart_app_activity" class="chart"></div>

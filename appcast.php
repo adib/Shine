@@ -25,7 +25,7 @@
 	// This table format is crap, but it future proofs us against Sparkle format changes
 	$ip = $_SERVER['REMOTE_ADDR'];
 	$dt = date("Y-m-d H:i:s");
-	$db->query("INSERT INTO shine_sparkle_reports (ip, dt) VALUES (:ip, :dt)", array('ip' => $ip, 'dt' => $dt));
+	$db->query("INSERT INTO shine_sparkle_reports (ip, dt, app_id) VALUES (:ip, :dt, :app_id)", array('ip' => $ip, 'dt' => $dt, 'app_id' => $app->id));
 	$id = $db->insertId();
 	foreach($_GET as $k => $v)
 		$db->query("INSERT INTO shine_sparkle_data (sparkle_id, `key`, data) VALUES (:id, :k, :v)", array('id' => $id, 'k' => $k, 'v' => $v));

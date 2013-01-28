@@ -149,3 +149,7 @@ CREATE TABLE `shine_serial_numbers` (
 	`order_id` INT(11) NOT NULL,
 	`serial_number` VARCHAR(255) NOT NULL
 )
+
+-- 2013.01.28 app_id is stored in sparkle reports
+
+ALTER TABLE `shine_sparkle_reports` ADD COLUMN app_id INT(10) UNSIGNED NOT NULL;

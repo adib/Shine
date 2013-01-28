@@ -11,7 +11,7 @@
 
         }
 
-        public static function track($page_title = '')
+        public static function track($page_title = '', $app_id = 0)
         {
             $db = Database::getDatabase();
 
@@ -32,8 +32,8 @@
             $exec_time = defined('START_TIME') ? microtime(true) - START_TIME : 0;
             $num_queries = $db->numQueries();
 
-            $sql = "INSERT INTO shine_downloads (dt, referer, referer_is_local, url, page_title, search_terms, img_search, browser_family, browser_version, os, os_version, ip, user_agent, exec_time, num_queries)
-                    VALUES (:dt, :referer, :referer_is_local, :url, :page_title, :search_terms, :img_search, :browser_family, :browser_version, :os, :os_version, :ip, :user_agent, :exec_time, :num_queries)";
+            $sql = "INSERT INTO shine_downloads (dt, referer, referer_is_local, url, page_title, search_terms, img_search, browser_family, browser_version, os, os_version, ip, user_agent, exec_time, num_queries, app_id)
+                    VALUES (:dt, :referer, :referer_is_local, :url, :page_title, :search_terms, :img_search, :browser_family, :browser_version, :os, :os_version, :ip, :user_agent, :exec_time, :num_queries, :app_id)";
             $vals = array('dt'               => $dt,
                           'referer_is_local' => $referer_is_local,
                           'referer'          => $referer,
@@ -48,7 +48,8 @@
                           'os'               => $os,
                           'user_agent'       => $user_agent,
                           'exec_time'        => $exec_time,
-                          'num_queries'      => $num_queries);
+                          'num_queries'      => $num_queries,
+                          'app_id'			 => $app_id);
             $db->query($sql, $vals);
         }
 

@@ -49,7 +49,7 @@ if ($a->ok()) {
 		$v->downloads++;
 		$v->update();
 	
-		Download::track();
+		Download::track('', $a->id);
 		# Google Analytics
 		if ($a->use_ga == 1) {
 			$uuid_ga = abs(crc32(dater())); # unsigned crc32

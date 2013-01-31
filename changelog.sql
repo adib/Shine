@@ -153,3 +153,8 @@ CREATE TABLE `shine_serial_numbers` (
 -- 2013.01.28 app_id is stored in sparkle reports
 
 ALTER TABLE `shine_sparkle_reports` ADD COLUMN app_id INT(10) UNSIGNED NOT NULL;
+
+-- 2013.01.31 sent_to_qcrm flag added; its default value is 0, but this flag should be set for all elder activations
+
+ALTER TABLE `shine_activations` ADD COLUMN sent_to_qcrm INT(1) UNSIGNED NOT NULL DEFAULT 0;
+UPDATE shine_activations SET sent_to_qcrm=1

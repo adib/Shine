@@ -1,16 +1,6 @@
 <?php
 require 'includes/master.inc.php';
 $db = Database::getDatabase();
-    
-function generateSalt($length = 8){
-	$chars = 'abdefhiknrstyzABDEFGHKNQRSTYZ23456789';
-	$numChars = strlen($chars);
-	$string = '';
-	for ($i = 0; $i < $length; $i++) {
-		$string .= substr($chars, rand(1, $numChars) - 1, 1);
-	}
-	return $string;
-}
 
 if (!isset($_POST['email']) || empty($_POST['email'])) {
 	echo json_encode(array('error' => 'Customer email is not specified'));
@@ -34,20 +24,6 @@ $sql = "SELECT a.id, a.name, a.serial_number, a.hwid, a.dt, a.ip, o.payer_email,
 
 $rows = $db->getRows($sql);
 
-$private_key = 'temp123';
-$salt = generateSalt(40);
-$signature = md5($private_key.$salt);
-
-$response = array(
-	'qcrm_api' => array(
-		'signature' => $signature,
-		'salt' =>	$salt,
-		'system' => '100005',
-		'method' => 'import',
-		'response_data' => ''
-	)
-);
-
 $response_data = array();
 
 foreach ($rows as $row) {
@@ -67,6 +43,5 @@ foreach ($rows as $row) {
 	$db->query("UPDATE shine_activations SET sent_to_qcrm=1 WHERE id='".$row['id']."' LIMIT 1");
 }
 
-$response['response_data'] = base64_encode(json_encode($response_data));
-echo $response;
+echo base64_encode(json_encode($response_data));
 ?>

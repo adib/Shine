@@ -20,7 +20,7 @@ if ($sk != $_POST['sk']) {
 	die();
 }
 
-$sql = "SELECT a.id, a.name, a.serial_number, a.hwid, a.dt, a.ip, o.payer_email, app.abbreviation, app.name as appname FROM shine_activations a LEFT JOIN shine_orders o ON a.order_id=o.id LEFT JOIN shine_applications app ON a.app_id=app.id WHERE payer_email='".$email."' AND sent_to_qcrm=0 AND a.app_id=4";
+$sql = "SELECT a.id, a.name, a.serial_number, a.hwid, a.dt, a.ip, o.payer_email, app.abbreviation, app.name as appname FROM shine_activations a LEFT JOIN shine_orders o ON a.order_id=o.id LEFT JOIN shine_applications app ON a.app_id=app.id WHERE payer_email='".$email."' AND sent_to_qcrm=0";
 
 $rows = $db->getRows($sql);
 

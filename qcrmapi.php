@@ -67,6 +67,6 @@ foreach ($rows as $row) {
 	$db->query("UPDATE shine_activations SET sent_to_qcrm=1 WHERE id='".$row['id']."' LIMIT 1");
 }
 
-$response['response_data'] = base64_encode($response_data);
-echo json_encode($response);
+$response['response_data'] = base64_encode(json_encode($response_data));
+echo $response;
 ?>

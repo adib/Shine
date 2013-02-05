@@ -158,3 +158,7 @@ ALTER TABLE `shine_sparkle_reports` ADD COLUMN app_id INT(10) UNSIGNED NOT NULL;
 
 ALTER TABLE `shine_activations` ADD COLUMN sent_to_qcrm INT(1) UNSIGNED NOT NULL DEFAULT 0;
 UPDATE shine_activations SET sent_to_qcrm=1
+
+-- 2013.02.05 reset sent_to_qcrm flag for all old activations
+
+UPDATE `shine_activations` SET sent_to_qcrm=0 WHERE dt < '2013-02-01'

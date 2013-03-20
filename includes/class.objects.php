@@ -315,7 +315,7 @@
 	                $row = $db->getRow();
 	                $this->load($row);
 	                
-	                $serials = DBObject::glob('SerialNumber', 'SELECT id, serial_number FROM shine_serial_numbers WHERE order_id='.$id.'');
+	                $serials = DBObject::glob('SerialNumber', 'SELECT id, serial_number FROM shine_serial_numbers WHERE order_id='.$this->id.'');
 	                
 	                $serial_numbers = array();
 	                foreach ($serials as $serial) {

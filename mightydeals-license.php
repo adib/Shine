@@ -47,10 +47,8 @@ $params = array(
 );
 $o->selectMultiple($params);
 
-$response = array();
-
 # Found
-if ($o->ok()) $response['serial'] = $o->serial_number;
+if ($o->ok()) $response = $o->serial_number;
 else {
 	# Insert Order
 	$o = new Order();
@@ -77,12 +75,7 @@ else {
 	$id = $o->insert();
 
 	# Return serial number
-	if ($id > 0) {
-		$response['serial'] = $o->serial_number;
-	}
-	else {
-		$response['warning'] = 'Order already exists. Security violation';
-	}
+	$response = ($id > 0) ? $o->serial_number : 'Order already exists. Security violation';
 }
 
-echo json_encode($response);
+echo $response;

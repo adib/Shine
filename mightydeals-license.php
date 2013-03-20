@@ -48,7 +48,7 @@ $params = array(
 $o->selectMultiple($params);
 
 # Found
-if ($o->ok()) echo $o->serial_number;
+if ($o->ok()) $response = $o->serial_number;
 else {
 	# Insert Order
 	$o = new Order();
@@ -75,6 +75,7 @@ else {
 	$id = $o->insert();
 
 	# Return serial number
-	if ($id > 0) echo $o->serial_number;
-	else 'Order already exists. Security violation';
+	$response = ($id > 0) ? $o->serial_number : 'Order already exists. Security violation';
 }
+
+echo $response;

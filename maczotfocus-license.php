@@ -27,11 +27,6 @@ if (empty($_REQUEST['email'])) {
 	die("Email is not set!");
 }
 
-if (empty($_REQUEST['orderID'])) {
-	error_log("OrderID is not set!");
-	die("OrderID is not set!");
-}
-
 # FIXME: security? nah, haven't heard of... (MacZOT have no security check ?)
 
 //# Security data collect
@@ -49,8 +44,7 @@ $o = new Order();
 $params = array(
 	'type' => 'FOCMacZOT',
 	'app_id' => $app->id,
-	'payer_email' => $_REQUEST['email'],
-	'notes' => $_REQUEST['orderID']
+	'payer_email' => $_REQUEST['email']
 );
 $o->selectMultiple($params);
 
@@ -67,7 +61,6 @@ else {
 	$o->license_type_id = $lt->id;
 	$o->dt = dater();
 	$o->type = 'FOCMacZOT';
-	$o->notes = $_REQUEST['orderID'];
 	$o->generateSerial(); # generates serial into $o->serial_number
 	
 	# Getting name

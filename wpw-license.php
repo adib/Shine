@@ -27,8 +27,7 @@ if( $curl = curl_init() ) {
     curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
     curl_setopt($curl, CURLOPT_POST, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $postRequest);
-    $out = curl_exec($curl);
-    echo $out;
+    $response = curl_exec($curl);
     curl_close($curl);
   }
 else {

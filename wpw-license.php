@@ -18,7 +18,7 @@ $name = $_REQUEST['name'];
 $email = $_REQUEST['email'];
 $reference = $_REQUEST['reference'];
 
-$security_request_hash = md5($email.$name.$orderID.'719279c718955653ca17889cc6f7629d');
+$security_request_hash = md5($email.$name.$reference.'719279c718955653ca17889cc6f7629d');
 
 $postRequest = "name=" . $name . "&email=" . $email . "&reference=" . $reference . "&security_request_hash=" . $security_request_hash;
 

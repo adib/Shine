@@ -39,7 +39,7 @@ foreach ($_REQUEST as $key => $val) {
 	if ($key != 'security_request_hash') $check_data .= $val;
 }
 
-if (md5($check_data . 'FOCUS2013SECURITY0520KEY') != $_REQUEST['security_request_hash'])
+if (md5($check_data . md5('FOCUS2013SECURITY0520KEY')) != $_REQUEST['security_request_hash'])
 	die('Security check failed.');
 
 $o = new Order();

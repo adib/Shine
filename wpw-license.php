@@ -16,7 +16,8 @@ if (empty($_REQUEST['reference'])) {
 
 $name = $_REQUEST['name'];
 $email = $_REQUEST['email'];
-$reference = $_REQUEST['reference'].$email;
+$orderID = $_REQUEST['orderid'];
+$reference = $_REQUEST['reference'].$orderID;
 
 $security_request_hash = md5($email.$name.$reference.'719279c718955653ca17889cc6f7629d');
 

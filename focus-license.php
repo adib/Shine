@@ -1,6 +1,8 @@
 <?php
 require 'includes/master.inc.php';
 
+define('MACPHUN_SECURITY_KEY', '65d894d7a5e5e500a4f50dc499d3affe');
+
 if (empty($_REQUEST['license_type'])) {
 	error_log("license_type is not set!");
 	die("License type is not set!");
@@ -40,6 +42,7 @@ foreach ($_REQUEST as $key => $val) {
 }
 
 if (md5($check_data . md5('FOCUS2013SECURITY0520KEY')) != $_REQUEST['security_request_hash']
+	&& md5($check_data . MACPHUN_SECURITY_KEY) != $_REQUEST['security_request_hash']
 	&& md5('FOCUS2013SECURITY0520KEY') != $_REQUEST['security_request_hash'])
 	die('Security check failed.');
 

@@ -1,7 +1,7 @@
 <?php
 require 'includes/master.inc.php';
 
-$abbreviations_list = array('PST', 'PSW');
+$abbreviations_list = array('PST', 'PSW', 'ISW');
 
 if (empty($_POST['abbr']) || !in_array($_POST['abbr'], $abbreviations_list)) {
 	error_log("Application {$_POST['abbr']} not found!");

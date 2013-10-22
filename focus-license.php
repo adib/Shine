@@ -41,9 +41,10 @@ foreach ($_REQUEST as $key => $val) {
 	if ($key != 'security_request_hash') $check_data .= $val;
 }
 
-if (md5($check_data . md5('FOCUS2013SECURITY0520KEY')) != $_REQUEST['security_request_hash']
-	&& md5($check_data . MACPHUN_SECURITY_KEY) != $_REQUEST['security_request_hash']
-	&& md5('FOCUS2013SECURITY0520KEY') != $_REQUEST['security_request_hash'])
+if (md5($check_data . md5('FOCUS2013SECURITY0520KEY')) != $_REQUEST['security_request_hash']					// for common bundles
+	&& md5($_REQUEST['email'] . md5('FOCUS2013SECURITY0520KEY')) != $_REQUEST['security_request_hash']			// for Paddle bundle
+	&& md5($check_data . MACPHUN_SECURITY_KEY) != $_REQUEST['security_request_hash']							// for Macphun bundle
+	&& md5('FOCUS2013SECURITY0520KEY') != $_REQUEST['security_request_hash'])									// for those who doesn't know about security
 	die('Security check failed.');
 
 $o = new Order();

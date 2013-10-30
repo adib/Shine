@@ -30,14 +30,23 @@
 			$o->payer_email = $_POST['email'];
 			$o->app_id      = $_POST['app_id'];
 			$o->notes       = $_POST['notes'];
-			$o->quantity    = $_POST['quantity'];
+			$o->quantity = $_POST['quantity'] * $lt->serials_quantity;
 			$o->expiration_date = $_POST['expiration_date'];
 			$o->type        = 'Manual';
 			$o->dt          = dater();
 			$o->item_name   = $app->name;
 			if (isset($lt)) $o->license_type_id = $lt->id;
-			if ($app->activation_online == '1') $o->generateSerial();
-			$o->insert();
+			if ($app->activation_online == '1') {
+				$serials = array();
+				
+				for ($i = 0; $i < $lt->serials_quantity; $i++) {
+					$o->generateSerial(); # generates serial into $o->serial_number	
+					$serials[] = $o->serial_number;
+				}
+				
+				$o->load(array('serial_number' => implode(',', $serials)));
+				$id = $o->save();
+			}
 
 			if ($app->activation_online != '1') $o->generateLicense();
 

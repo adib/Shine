@@ -14,10 +14,22 @@ if (empty($_REQUEST['reference'])) {
 	die("Order reference is not set!");
 }
 
+if (empty($_REQUEST['security_hash'])) {
+	error_log("Security hash is not set!");
+	die("Security hash is not set!");
+}
+
+$wpwActions = array('MightyDealsApril2013', 'HackStoreDecember2013');
+
 $name = $_REQUEST['name'];
 $email = $_REQUEST['email'];
 $orderID = $_REQUEST['orderid'];
 $reference = $_REQUEST['reference'].$orderID;
+$security_hash = $_REQUEST['security_hash'];
+
+if (!in_array($_REQUEST['reference'], $wpwActions) || ($security_hash != md5($name.$email.$reference.md5('WPW2013LICENSES')))) {
+	die('Security check failed');
+}
 
 $security_request_hash = md5($email.$name.$reference.'719279c718955653ca17889cc6f7629d');
 

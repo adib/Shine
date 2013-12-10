@@ -19,7 +19,7 @@ if (empty($_REQUEST['security_hash'])) {
 	die("Security hash is not set!");
 }
 
-$wpwActions = array('MightyDealsApril2013', 'HackStoreDecember2013');
+$wpwActions = array('MightyDealsApril2013', 'HackStoreDecember2013', '2dealDecember2013');
 
 $name = $_REQUEST['name'];
 $email = $_REQUEST['email'];

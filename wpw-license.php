@@ -1,21 +1,19 @@
 <?php
 if (empty($_REQUEST['name'])) {
-	error_log("Name is not set!");
 	die("Name is not set!");
 }
 
 if (empty($_REQUEST['email'])) {
-	error_log("Email is not set!");
 	die("Email is not set!");
 }
 
 if (empty($_REQUEST['reference'])) {
-	error_log("Order reference is not set!");
 	die("Order reference is not set!");
 }
 
-if (empty($_REQUEST['security_hash'])) {
-	error_log("Security hash is not set!");
+$hashparam = 'security_request_hash';
+
+if (empty($_REQUEST[$hashparam])) {
 	die("Security hash is not set!");
 }
 
@@ -25,9 +23,19 @@ $name = $_REQUEST['name'];
 $email = $_REQUEST['email'];
 $orderID = $_REQUEST['orderid'];
 $reference = $_REQUEST['reference'].$orderID;
-$security_hash = $_REQUEST['security_hash'];
+$security_hash = $_REQUEST[$hashparam];
 
-if (!in_array($_REQUEST['reference'], $wpwActions) || ($security_hash != md5($name.$email.$reference.md5('WPW2013LICENSES')))) {
+ksort($_REQUEST);
+$data = '';
+$privatekey = md5('WPW2013LICENSES');
+
+foreach ($_REQUEST as $key => $val) {
+	if ($key != $hashparam) {
+		$data .= stripslashes($val);
+	}
+}
+
+if (!in_array($_REQUEST['reference'], $wpwActions) || (md5($data . $privatekey) != $_REQUEST[$hashparam])) {
 	die('Security check failed');
 }
 

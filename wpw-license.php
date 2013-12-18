@@ -58,7 +58,7 @@ if( $curl = curl_init() ) {
 			'list'	=> $rawReference.' list'
 		);
 		
-		if (!empty($_POST['name'])) {
+		if (!empty($name)) {
 			preg_match("/([a-zA-Z]*)\s*([a-zA-Z]*)?/", $name, $matches);
 			$postRequest['fname'] = $matches[1];
 			$postRequest['lname'] = $matches[2];

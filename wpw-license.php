@@ -19,10 +19,11 @@ if (empty($_REQUEST[$hashparam])) {
 
 $wpwActions = array('MightyDealsApril2013', 'HackStoreDecember2013', '2dealDecember2013');
 
-$name = $_REQUEST['name'];
-$email = $_REQUEST['email'];
-$orderID = $_REQUEST['orderid'];
-$reference = $_REQUEST['reference'].$orderID;
+$name = trim($_REQUEST['name']);
+$email = trim($_REQUEST['email']);
+$orderID = trim($_REQUEST['orderid']);
+$rawReference = trim($_REQUEST['reference']);
+$reference = $rawReference.$orderID;
 $security_hash = $_REQUEST[$hashparam];
 
 ksort($_REQUEST);
@@ -35,7 +36,7 @@ foreach ($_REQUEST as $key => $val) {
 	}
 }
 
-if (!in_array($_REQUEST['reference'], $wpwActions) || (md5($data . $privatekey) != $_REQUEST[$hashparam])) {
+if (!in_array($rawReference, $wpwActions) || (md5($data . $privatekey) != $_REQUEST[$hashparam])) {
 	die('Security check failed');
 }
 
@@ -49,6 +50,29 @@ if( $curl = curl_init() ) {
     curl_setopt($curl, CURLOPT_POST, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $postRequest);
     $response = curl_exec($curl);
+    
+	    $postRequest = array(
+			'email'	=> $email,
+			'fname'	=> '',
+			'lname'	=> '',
+			'list'	=> $rawReference.' list'
+		);
+		
+		if (!empty($_POST['name'])) {
+			preg_match("/([a-zA-Z]*)\s*([a-zA-Z]*)?/", $name, $matches);
+			$postRequest['fname'] = $matches[1];
+			$postRequest['lname'] = $matches[2];
+		}
+		
+		if( $curlMX = curl_init() ) {
+		    curl_setopt($curlMX, CURLOPT_URL, 'http://mx-global.com/signupuseradd.php');
+		    curl_setopt($curlMX, CURLOPT_RETURNTRANSFER,true);
+		    curl_setopt($curlMX, CURLOPT_POST, true);
+		    curl_setopt($curlMX, CURLOPT_POSTFIELDS, http_build_query($postRequest));
+		    $responseMX = curl_exec($curlMX);
+		    curl_close($curlMX);
+		}
+    
     curl_close($curl);
   }
 else {

@@ -41,6 +41,7 @@
 					$cdn = new AmazonCloudFront();
 					$response = $cdn->create_invalidation($app->s3distribution, 'alternate_fname' . time(), $alternate_fname);
 				case 0:
+					setCFconfig($app);
 				/*
 					# Amazon S3 file upload
 					$s3 = new S3($app->s3key, $app->s3pkey);

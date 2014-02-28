@@ -87,7 +87,7 @@
 				{
 					case 0:
 					case 1:
-						$enclosureLink = (1 == $app->is_ssl ? "https" : "http") . "://" . $app->s3domain . "/" . $app->s3path;
+						$enclosureLink = (1 == $app->is_ssl ? "https" : "http") . "://" . $app->s3domain . "/" . $app->s3path . "/" . $v->url;
 					break;
 					case 2:
 						$enclosureLink = HTTP_SITE_NAME.'/dl/'.$v->url;

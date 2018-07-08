@@ -41,4 +41,42 @@
 			
 			return null;
 		}
+		
+		# Generates plist file
+		static public function generatePlist($dict, $signature = '') {
+			$plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?".">\n";
+			$plist .= "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n";
+			$plist .= "<plist version=\"1.0\">\n<dict>\n";
+			
+			foreach($dict as $key => $value) {
+				$value = utf8_encode($value);
+				$plist .= "\t<key>" . htmlspecialchars($key, ENT_NOQUOTES) . "</key>\n";
+				$plist .= "\t<string>" . htmlspecialchars($value, ENT_NOQUOTES) . "</string>\n";
+			}
+			if (!empty($signature)) {
+				$plist .= "\t<key>signature</key>\n";
+				$plist .= "\t<data>$signature</data>\n";
+			}
+			$plist .= "</dict>\n";
+			$plist .= "</plist>\n";
+			
+			return $plist;
+		}
+		
+		# Generates xml file (for Win apps)
+		static public function generateXML($dict, $signature) {
+			$xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?".">\n";
+			$xml .= "<License>\n";
+			
+			foreach($dict as $key => $value) {
+				$key = htmlspecialchars(ucfirst($key), ENT_NOQUOTES);
+				$value = htmlspecialchars(utf8_encode($value), ENT_NOQUOTES);
+				$xml .= "\t<".$key.">" . $value . "</".$key.">\n";
+			}
+			if (!empty($signature)) $xml .= "\t<Signature>$signature</Signature>\n";
+			
+			$xml .= "</License>\n";
+			
+			return $xml;
+		}
 	}

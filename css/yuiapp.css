@@ -1,5 +1,7 @@
 html, body { background-color:#f0f0ee; color:#222; }
 
+.hid { display: none!important; }
+
 /* Make the page full bleed */
 #doc3 { margin:0; }
 
@@ -153,4 +155,11 @@ a.big-button:hover {
 
 table.lines tr {
 	border-bottom:1px solid #F0F0EE;
+}
+
+.total_num {
+	float: right;
+	width: 200px;
+	font-size: 16px;
+	color: #BF6E37;
 }

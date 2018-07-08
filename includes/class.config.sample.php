@@ -13,6 +13,16 @@
 	define('POSTMARKAPP_API_KEY', '');
 	define('POSTMARKAPP_MAIL_FROM_ADDRESS', '');
 	define('POSTMARKAPP_MAIL_FROM_NAME', '');
+	
+	
+	
+	define('VERSION_STATUS_PRODUCTION', 1);
+	define('VERSION_STATUS_BETA', 2);
+	define('VERSION_STATUS_TEST', 3);
+	
+	define('HTTP_SITE_NAME', !empty($_SERVER['SERVER_NAME']) ? 'http://'.$_SERVER['SERVER_NAME'] : '');
+	
+	
 
     class Config
     {

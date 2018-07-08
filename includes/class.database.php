@@ -69,7 +69,7 @@
             return $this->isConnected();
         }
 
-        public function query($sql, $args_to_prepare = null, $exception_on_missing_args = true)
+        public function query($sql, $args_to_prepare = null, $exception_on_missing_args = true, $notify_error = true)
         {
             if(!$this->isConnected()) $this->connect();
 
@@ -87,7 +87,7 @@
             }
 
             $this->queries[] = $sql;
-            $this->result = mysql_query($sql, $this->db) or $this->notify();
+            $this->result = mysql_query($sql, $this->db) or ($notify_error && $this->notify());
             return $this->result;
         }
 

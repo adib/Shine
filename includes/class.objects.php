@@ -31,7 +31,7 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_applications', array('name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 'sparkle_key', 'sparkle_pkey', 'ap_key', 'ap_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_security_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name'), $id);
+            parent::__construct('shine_applications', array('abbreviation', 'name', 'link', 'bundle_name', 'upgrade_app_id', 's3key', 's3pkey', 's3bucket', 's3path', 's3domain', 's3distribution', 'sparkle_key', 'sparkle_pkey', 'activation_online', 'activation_online_class', 'ap_key', 'ap_pkey', 'cf_key', 'cf_pkey', 'rsa_key', 'rsa_pkey', 'from_email', 'email_subject', 'email_body', 'license_filename', 'custom_salt', 'license_type', 'return_url', 'fs_license_key', 'fs_security_key', 'mu_license_key', 'i_use_this_key', 'tweet_terms', 'hidden', 'engine_class_name', 'bundle_id', 'direct_download', 'storage', 'is_ssl', 'use_ga', 'ga_key', 'ga_domain', 'ga_country', 'getdealy_name', 'default_license_abbr', 'getdealy_price', 'use_postmark'), $id);
         }
 
 		public function engine()
@@ -42,34 +42,53 @@
 			return $engine;
 		}
 
+		public function engine_online()
+		{
+			$class_name = 'EngineOnline' . $this->activation_online_class;
+			$engine_online = new $class_name();
+			$engine_online->application = $this;
+			return $engine_online;
+		}
+		
+		public function decodeRequestData($data) {
+			openssl_private_decrypt(base64_decode($data), $open_data, $this->rsa_pkey);
+			if (!empty($open_data)) $open_data = json_decode($open_data, true);
+			return $open_data;
+		}
+
 		public function versions()
 		{
 			return DBObject::glob('Version', "SELECT * FROM shine_versions WHERE app_id = '{$this->id}' ORDER BY dt DESC");
 		}
 
+		public function license_types()
+		{
+			return DBObject::glob('LicenseType', "SELECT * FROM shine_license_types WHERE app_id = '{$this->id}' ORDER BY abbreviation ASC");
+		}
+
 		public function strCurrentVersion()
 		{
 			$db = Database::getDatabase();
-			return $db->getValue("SELECT version_number FROM shine_versions WHERE app_id = '{$this->id}' ORDER BY dt DESC LIMIT 1");
+			return $db->getValue("SELECT version_number FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION." ORDER BY dt DESC LIMIT 1");
 		}
 		
 		public function strLastReleaseDate()
 		{
 			$db = Database::getDatabase();
-			$dt = $db->getValue("SELECT dt FROM shine_versions WHERE app_id = '{$this->id}' ORDER BY dt DESC LIMIT 1");
+			$dt = $db->getValue("SELECT dt FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION." ORDER BY dt DESC LIMIT 1");
 			return time2str($dt);
 		}
 		
         public function totalDownloads()
         {
             $db = Database::getDatabase();
-            return $db->getValue("SELECT SUM(downloads) FROM shine_versions WHERE app_id = '{$this->id}'");
+            return $db->getValue("SELECT SUM(downloads) FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION);
         }
 
         public function totalUpdates()
         {
             $db = Database::getDatabase();
-            return $db->getValue("SELECT SUM(updates) FROM shine_versions WHERE app_id = '{$this->id}'");
+            return $db->getValue("SELECT SUM(updates) FROM shine_versions WHERE app_id = '{$this->id}' AND status = ".VERSION_STATUS_PRODUCTION);
         }
 
 		public function numSupportQuestions()
@@ -173,11 +192,51 @@
 		}
     }
 
+    class Inapp extends DBObject
+    {
+        public function __construct()
+        {
+            parent::__construct('shine_inapp', array('trx_id', 'app_id', 'inapp_id', 'trx_date', 'bundle_version', 'price', 'currency', 'uuid', 'ip', 'country'));
+            $this->idColumnName = 'trx_id';
+        }
+        
+        public function insert($cmd = 'INSERT INTO')
+        {
+            $db = Database::getDatabase();
+
+            $data = array();
+            foreach($this->columns as $k => $v)
+                if(!is_null($v))
+                    $data[$k] = $db->quote($v);
+
+            $columns = '`' . implode('`, `', array_keys($data)) . '`';
+            $values = implode(',', $data);
+            
+            $this->id = $data['trx_id'];
+
+            return $db->query("$cmd `{$this->tableName}` ($columns) VALUES ($values)", null, false, false);
+        }
+
+	public function applicationName()
+	{
+		static $cache;
+		if(!is_array($cache)) $cache = array();
+
+		if(!isset($cache[$this->app_id]))
+		{
+			$app = new Application($this->app_id);
+			$cache[$this->app_id] = $app->name;
+		}
+		
+		return $cache[$this->app_id];
+	}
+    }
+
     class Activation extends DBObject
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_activations', array('app_id', 'name', 'serial_number', 'guid', 'dt', 'ip', 'order_id'), $id);
+            parent::__construct('shine_activations', array('app_id', 'name', 'serial_number', 'hwid', 'guid', 'dt', 'ip', 'order_id'), $id);
         }
 
 		public function applicationName()
@@ -193,13 +252,109 @@
 			
 			return $cache[$this->app_id];
 		}
+
+		public function generateLicenseOnline($hwid, $customer_name)
+		{
+			$app = new Application($this->app_id);
+			$engine = $app->engine();
+			$engine->order = new Order($this->order_id);
+			return $engine->generateLicenseOnline($hwid, $customer_name);
+		}
 	}
 
     class Order extends DBObject
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_orders', array('app_id', 'dt', 'txn_type', 'first_name', 'last_name', 'residence_country', 'item_name', 'payment_gross', 'mc_currency', 'business', 'payment_type', 'verify_sign', 'payer_status', 'tax', 'payer_email', 'txn_id', 'quantity', 'receiver_email', 'payer_id', 'receiver_id', 'item_number', 'payment_status', 'payment_fee', 'mc_fee', 'shipping', 'mc_gross', 'custom', 'license', 'type', 'deleted', 'hash', 'claimed', 'serial_number', 'notes', 'upgrade_coupon', 'deactivated'), $id);
+            parent::__construct('shine_orders', array('app_id', 'dt', 'txn_type', 'first_name', 'last_name', 'residence_country', 'item_name', 'payment_gross', 'mc_currency', 'business', 'payment_type', 'verify_sign', 'payer_status', 'tax', 'payer_email', 'txn_id', 'quantity', 'receiver_email', 'payer_id', 'receiver_id', 'item_number', 'payment_status', 'payment_fee', 'mc_fee', 'shipping', 'mc_gross', 'custom', 'license', 'type', 'deleted', 'hash', 'claimed', 'serial_number', 'notes', 'upgrade_coupon', 'deactivated', 'expiration_date', 'license_type_id'), $id);
+        }
+        
+        public function select($id, $column = null)
+        {
+            $db = Database::getDatabase();
+
+            if(is_null($column)) $column = $this->idColumnName;
+            $column = $db->escape($column);
+
+            $db->query("SELECT * FROM `{$this->tableName}` WHERE `$column` = :id LIMIT 1", array('id' => $id));
+            if($db->hasRows())
+            {
+                $row = $db->getRow();
+                $this->load($row);
+                
+                $serials = DBObject::glob('SerialNumber', 'SELECT id, serial_number FROM shine_serial_numbers WHERE order_id='.$id.'');
+                
+                $serial_numbers = array();
+                foreach ($serials as $serial) {
+	                $serial_numbers[] = $serial->serial_number;
+                }
+                
+                if (!empty($serial_numbers)) {
+	               $this->serial_number = implode(', ', $serial_numbers);
+                }
+                        
+                return true;
+            }
+
+            return false;
+        }
+
+        public function selectMultiple($params)
+        {
+            if (!empty($params)) {
+	            $db = Database::getDatabase();
+	
+	            $where = array();
+	            foreach ($params as $col => $val) {
+	                $where[] = "`".$db->escape($col)."` = '".$db->escape($val)."'";
+	            }
+	
+	            $db->query("SELECT * FROM `{$this->tableName}` WHERE ".implode(' AND ', $where))." LIMIT 1";
+	            if($db->hasRows())
+	            {
+	                $row = $db->getRow();
+	                $this->load($row);
+	                
+	                $serials = DBObject::glob('SerialNumber', 'SELECT id, serial_number FROM shine_serial_numbers WHERE order_id='.$this->id.'');
+	                
+	                $serial_numbers = array();
+	                foreach ($serials as $serial) {
+		                $serial_numbers[] = $serial->serial_number;
+	                }
+	                
+	                if (!empty($serial_numbers)) {
+		               $this->serial_number = implode(', ', $serial_numbers);
+	                }
+	                 
+	                return true;
+	            }
+            }
+
+            return false;
+        }
+        
+        public function save()
+        {
+        	$serials = explode(',', $this->serial_number);
+        	$this->serial_number = '';
+        	
+            if(is_null($this->id))
+                $this->insert();
+            else
+                $this->update();
+        	
+        	$sn = new SerialNumber();
+        	foreach ($serials as $serial) {
+	        	$sn->load(array(
+	        		'id' => null,
+	        		'order_id' => $this->id,
+	        		'serial_number' => $serial
+	        	));
+
+	        	$sn->save();
+        	}
+        	
+        	return $this->id;
         }
 
 		public function activationCount()
@@ -228,6 +383,25 @@
 			$engine = $app->engine();
 			$engine->order = $this;
 			$engine->generateLicense();
+		}
+
+		public function generateSerial()
+		{
+			$app = new Application($this->app_id);
+			$engine_online = $app->engine_online();
+			$engine_online->order = $this;
+			
+			do {
+				$this->serial_number = $engine_online->generateSerial();
+				
+				# In case we find order with the same serial (almost impossible, but...)
+				$search_o = new self();
+				$params = array(
+					'app_id' => $this->app_id,
+					'serial_number' => $this->serial_number
+				);
+				$search_o->selectMultiple($params);
+			} while ($search_o->ok());
 		}
 
 		public function emailLicense()
@@ -290,7 +464,23 @@
     {
         public function __construct($id = null)
         {
-            parent::__construct('shine_versions', array('app_id', 'human_version', 'version_number', 'dt', 'release_notes', 'filesize', 'url', 'downloads', 'updates', 'signature'), $id);
+            parent::__construct('shine_versions', array('app_id', 'human_version', 'version_number', 'dt', 'release_notes', 'filesize', 'url', 'alternate_fname', 'downloads', 'updates', 'signature', 'status'), $id);
+        }
+    }
+
+    class LicenseType extends DBObject
+    {
+        public function __construct($id = null)
+        {
+            parent::__construct('shine_license_types', array('app_id', 'abbreviation', 'quantity', 'expiration_days', 'max_update_version', 'serials_quantity'), $id);
+        }
+    }
+
+    class SerialNumber extends DBObject
+    {
+        public function __construct($id = null)
+        {
+            parent::__construct('shine_serial_numbers', array('order_id', 'serial_number'), $id);
         }
     }
 

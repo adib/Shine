@@ -11,7 +11,7 @@
 	{
 		$q = $_GET['q'];
 		$_q = $db->escape($q);
-		$search_sql = " AND (first_name LIKE '%$_q%' OR last_name LIKE '%$_q%' OR payer_email LIKE '%$_q%') ";
+		$search_sql = " AND (first_name LIKE '%$_q%' OR last_name LIKE '%$_q%' OR payer_email LIKE '%$_q%' OR serial_number LIKE '%$_q%') ";
 	}
 	else
 	{
@@ -19,7 +19,7 @@
 		$search_sql = '';
 	}
 
-	if(isset($_GET['id']))
+	if(!empty($_GET['id']))
 	{
 		$app_id = intval($_GET['id']);
 		$total_num_orders = $db->getValue("SELECT COUNT(*) FROM shine_orders WHERE app_id = $app_id $search_sql ORDER BY dt DESC");
@@ -80,7 +80,7 @@
                         <div class="hd">
                             <h2>Orders</h2>
 							<ul>
-								<li class="<?PHP if(!isset($_GET['id'])) echo 'active'; ?>"><a href="orders.php">All Orders</a></li>
+								<li class="<?PHP if(empty($_GET['id'])) echo 'active'; ?>"><a href="orders.php">All Orders</a></li>
 								<?PHP foreach($applications as $a) : if(!in_array($a->id, $available_apps)) continue; ?>
 								<li class="<?PHP if(@$_GET['id'] == $a->id) echo 'active'; ?>"><a href="orders.php?id=<?PHP echo $a->id; ?>"><?PHP echo $a->name; ?></a></li>
 								<?PHP endforeach; ?>
@@ -88,6 +88,7 @@
 							<div class="clear"></div>
                         </div>
                         <div class="bd">
+                        	<div class="total_num">Total orders: <?php echo $total_num_orders; ?></div>
 	                        <ul class="pager">
                                 <li><a href="orders.php?page=<?PHP echo $pager->prevPage(); ?>&amp;id=<?PHP echo @$app_id; ?>">&#171; Prev</a></li>
 								<?PHP for($i = 1; $i <= $pager->numPages; $i++) : ?>
@@ -108,7 +109,9 @@
 										<td>Buyer</td>
 										<td>Email</td>
 										<td>Type</td>
+										<td>Quantity</td>
 										<td>Order Date</td>
+										<td>Expire Date</td>
 										<td>Amount</td>
 										<td>&nbsp;</td>
                                     </tr>
@@ -120,7 +123,9 @@
 										<td><?PHP echo $o->first_name; ?> <?PHP echo $o->last_name; ?></td>
 										<td><a href="mailto:<?PHP echo utf8_encode($o->payer_email); ?>"><?PHP echo utf8_encode($o->payer_email); ?></a></td>
 										<td><?PHP echo $o->type; ?></td>
+										<td><?PHP echo $o->quantity; ?></td>
 										<td><?PHP echo dater($o->dt, 'm/d/Y g:ia') ?></td>
+										<td><?PHP $val = $o->expiration_date; echo strtotime($val) > 0 ? dater($val, 'm/d/Y g:ia') : 'Never'; ?></td>
 										<td><?PHP echo $o->intlAmount(); ?></td>
 										<td><a href="order.php?id=<?PHP echo $o->id; ?>">View</a></td>
 									</tr>
@@ -153,7 +158,7 @@
 					<div class="bd">
 						<form action="orders.php?id=<?PHP echo @$app_id; ?>" method="get">
 							<p><input type="text" name="q" value="<?PHP echo @$q; ?>" id="q" class="text">
-							<span class="info">Searches Buyer's Name and Email address.</span></p>
+							<span class="info">Searches orders by Serial number, Buyer's Name or Email address.</span></p>
 							<p><input type="submit" name="btnSearch" value="Search" id="btnSearch"> | <a href="order-new.php">Create Manual Order</a></p>
 						</form>
 					</div>

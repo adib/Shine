@@ -19,7 +19,7 @@
 		$search_sql = '';
 	}
 
-	if(isset($_GET['id']))
+	if(!empty($_GET['id']))
 	{
 		$app_id = intval($_GET['id']);
 		$total_num_activations = $db->getValue("SELECT COUNT(*) FROM shine_activations WHERE app_id = $app_id $search_sql ORDER BY dt DESC");
@@ -54,7 +54,7 @@
                         <div class="hd">
                             <h2>Activations</h2>
 							<ul>
-								<li class="<?PHP if(!isset($_GET['id'])) echo 'active'; ?>"><a href="activations.php">All Activations</a></li>
+								<li class="<?PHP if(empty($_GET['id'])) echo 'active'; ?>"><a href="activations.php">All Activations</a></li>
 								<?PHP foreach($applications as $a) : if(!in_array($a->id, $available_apps)) continue; ?>
 								<li class="<?PHP if(@$_GET['id'] == $a->id) echo 'active'; ?>"><a href="activations.php?id=<?PHP echo $a->id; ?>"><?PHP echo $a->name; ?></a></li>
 								<?PHP endforeach; ?>
@@ -62,6 +62,8 @@
 							<div class="clear"></div>
                         </div>
                         <div class="bd">
+                        	<div class="total_num">Total activations: <?php echo $total_num_activations; ?></div>
+                        
 	                        <ul class="pager">
                                 <li><a href="activations.php?page=<?PHP echo $pager->prevPage(); ?>&amp;id=<?PHP echo @$app_id; ?>">&#171; Prev</a></li>
 								<?PHP for($i = 1; $i <= $pager->numPages; $i++) : ?>
@@ -79,6 +81,7 @@
                                 <thead>
                                     <tr>
 										<td>Application</td>
+										<td>HWID</td>
 										<td>Email</td>
 										<td>Activation Date</td>
 										<td>Serial Number</td>
@@ -89,7 +92,8 @@
 									<?PHP foreach($activations as $act) : ?>
 									<tr class="<?PHP if($act->order_id == '') { echo 'fraud'; } ?>">
 										<td><?PHP echo $act->applicationName(); ?></td>
-										<td><a href="order.php?id=<?PHP echo $act->order_id; ?>"><?PHP echo $act->name; ?></a></td>
+										<td><?PHP echo $act->hwid; ?></td>
+										<td><?PHP echo $act->name; ?> (<a href="order.php?id=<?PHP echo $act->order_id; ?>">View order</a>)</td>
 										<td><?PHP echo dater($act->dt, 'm/d/Y g:ia') ?></td>
 										<td><?PHP echo array_shift(explode('-', $act->serial_number)); ?>...</td>
 										<td><?PHP echo $act->ip; ?></td>

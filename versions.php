@@ -18,6 +18,7 @@
                             <h2>Applications</h2>
 							<ul>
 								<li><a href="application.php?id=<?PHP echo $app->id; ?>"><?PHP echo $app->name; ?></a></li>
+								<li><a href="license-types.php?id=<?PHP echo $app->id; ?>">License types</a></li>
 								<li class="active"><a href="versions.php?id=<?PHP echo $app->id; ?>">Versions</a></li>
 								<li><a href="version-new.php?id=<?PHP echo $app->id; ?>">Release New Version</a></li>
 							</ul>
@@ -32,6 +33,7 @@
 										<th>Release Date</th>
 										<th>Downloads</th>
 										<th>Updates</th>
+										<th>Status</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -42,6 +44,9 @@
 										<td><?PHP echo dater($v->dt, 'n/d/Y g:ia'); ?></td>
 										<td><?PHP echo number_format($v->downloads); ?></td>
 										<td><?PHP echo number_format($v->updates); ?></td>
+										<td><span style="color: darkred;">
+											<?PHP echo $v->status == VERSION_STATUS_PRODUCTION ? 'production' : ($v->status == VERSION_STATUS_BETA ? 'beta' : 'test'); ?>
+										</span></td>
 									</tr>
 									<?PHP endforeach; ?>
 								</tbody>

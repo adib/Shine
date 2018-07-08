@@ -1,5 +1,7 @@
 <?PHP
+	require_once 'aws-sdk-for-php/sdk.class.php';
 	require 'includes/master.inc.php';
+	
 	$Auth->requireAdmin('login.php');
 	$nav = 'applications';
 	
@@ -11,29 +13,22 @@
 	if(!$app->ok()) redirect('index.php');
 
 	if(isset($_POST['btnCreateVersion']))
-	{
-		// BEGIN adib 7-Apr-2010 10:54
-		// replace $_FILES['file'] with $uploadedFile
-		$uploadedFile = $_FILES['file'];
-		// END adib 7-Apr-2010 10:54
-		
+	{		
 		$Error->blank($_POST['version_number'], 'Version Number');
 		$Error->blank($_POST['human_version'], 'Human Readable Version Number');
-
-		// BEGIN adib 7-Apr-2010 10:57
-		//$Error->upload($_FILES['file'], 'file');
-		if(empty($uploadedFile['tmp_name'])) {
-			$uploadFolder = $Config->uploadFolder;
-			if(!empty($_POST['existingUploadedFile']) && !empty($uploadFolder)) {
-				$uploadedFile['name'] = $_POST['existingUploadedFile'];
-				$uploadedFile['tmp_name'] = $uploadFolder . '/' . $_POST['existingUploadedFile'];
-			}
-			$Error->valid_file($uploadedFile['tmp_name'],'file');
-		} else {
-			$Error->upload($uploadedFile, 'file');
-		}
-		// END adib 7-Apr-2010 10:57
-		
+        
+        // Check if we're uploading an already-existing file
+        if(empty($_FILES['file']['tmp_name'])) {
+            $uploadFolder = $Config->uploadFolder;
+            if(!empty($_POST['existingUploadedFile']) && !empty($uploadFolder)) {
+                $_FILES['file']['name'] = $_POST['existingUploadedFile'];
+                $_FILES['file']['tmp_name'] = $uploadFolder . '/' . $_POST['existingUploadedFile'];
+            }
+            $Error->valid_file($_FILES['file']['tmp_name'],'file');
+        } else {
+            $Error->upload($_FILES['file'], 'file');
+        }
+        
 		if($Error->ok())
 		{
 			$v = new Version();
@@ -43,72 +38,86 @@
 			$v->release_notes  = $_POST['release_notes'];
 			$v->dt             = dater();
 			$v->downloads      = 0;
+			$v->filesize       = filesize($_FILES['file']['tmp_name']);
+			$v->signature      = sign_file($_FILES['file']['tmp_name'], $app->sparkle_pkey);
+			$v->status         = !empty($_POST['version_status']) ? $_POST['version_status'] : VERSION_STATUS_PRODUCTION;
+			if (!empty($_POST['alternate_fname'])) $v->alternate_fname = $_POST['alternate_fname'];
 			
-			// BEGIN adib 7-Apr-2010 10:58
-			//$v->filesize       = filesize($_FILES['file']['tmp_name']);
-			//$v->signature      = sign_file($_FILES['file']['tmp_name'], $app->sparkle_pkey);
-			//$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . substr($_FILES['file']['name'], -3);
-			$v->filesize       = filesize($uploadedFile['tmp_name']);
-			$v->signature      = sign_file($uploadedFile['tmp_name'], $app->sparkle_pkey);
-			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . substr($uploadedFile['name'], -3);
-			// END adib 7-Apr-2010 10:58
-			
-			// BEGIN adib 7-Apr-2010 12:36
-			// upload to S3 only if its configured.
-			if(!empty($app->s3path)) {
-			// END adib 7-Apr-2010 12:36
-			
-				$v->url = slash($app->s3path) . $object;
-				$info   = parse_url($app->s3path);
-				$object = slash($info['path']) . $object;
-				
-				// BEGIN adib 7-Apr-2010 10:59
-				//chmod($_FILES['file']['tmp_name'], 0755);
-				if(is_uploaded_file($uploadedFile['tmp_name'])) {
-					chmod($uploadedFile['tmp_name'], 0755);
-				}
-				// END adib 7-Apr-2010 10:59
-				
-				$s3 = new S3($app->s3key, $app->s3pkey);
-				
-				// BEGIN adib 7-Apr-2010 11:00
-				//$s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
-				$s3->uploadFile($app->s3bucket, $object, $uploadedFile['tmp_name'], true);
-				// END adib 7-Apr-2010 11:00
-				
-			// BEGIN adib 7-Apr-2010 12:37
-			} else if (!empty($Config->downloadBaseFolder)) {
-				// upload into a folder local to the web server.
-				$downloadFolder = $Config->downloadBaseFolder . '/' . $app->id;
-				if(!is_dir($downloadFolder)) {
-					if(!mkdir($downloadFolder, 0775, true)) {
-						die('Could not create download folder ' . $downloadFolder);
-					} 
-				}
-				
-				$destinationFile = $downloadFolder . '/' . $object;
-				
-				if(is_uploaded_file($uploadedFile['tmp_name'])) {
-					move_uploaded_file($uploadedFile['tmp_name'], $destinationFile);
-				} else {
-					// just copy the file
-					copy($uploadedFile['tmp_name'],$destinationFile);
-				}
-				chmod($destinationFile,0664);
-				
-				$v->url = $Config->downloadBaseURL . '/' . $app->id . '/' . $object;
-			} // !empty($app->s3path)
-			// END adib 7-Apr-2010 12:37
-			
-			$v->insert();
+			$object = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app->name)) . "_" . $v->version_number . "." . pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+			$v->url = $object;
+			chmod($_FILES['file']['tmp_name'], 0755);
 
-			redirect('versions.php?id=' . $app->id);
+			$alternate_fname = $v->alternate_fname;
+			$uploadS3result = true;
+			switch ($app->storage)
+			{
+				case 1:
+					setCFconfig($app);
+					$cdn = new AmazonCloudFront();
+					$response = $cdn->create_invalidation($app->s3distribution, 'alternate_fname' . time(), $alternate_fname);
+				case 0:
+					setCFconfig($app);
+				/*
+					# Amazon S3 file upload
+					$s3 = new S3($app->s3key, $app->s3pkey);
+					$uploadS3result = $s3->uploadFile($app->s3bucket, $object, $_FILES['file']['tmp_name'], true);
+				*/
+					$s3 = new AmazonS3();
+					$file_resource = fopen($_FILES['file']['tmp_name'], 'r');
+
+	                $opt = array(
+	                        'fileUpload'	=> $file_resource,
+	                        'acl'			=> AmazonS3::ACL_PUBLIC
+	                );
+	                
+	                $path = str_replace('//', '/', $app->s3path.'/'.$object);
+	                $response = $s3->create_object($app->s3bucket, $path, $opt);
+
+	                $uploadS3result = $response->isOK();
+					
+					if (!empty($alternate_fname))
+					{
+						$file_resource = fopen($_FILES['file']['tmp_name'], 'r');
+	
+		                $opt = array(
+		                        'fileUpload'	=> $file_resource,
+		                        'acl'			=> AmazonS3::ACL_PUBLIC
+		                );
+		                
+		                $path = str_replace('//', '/', $app->s3path.'/'.$object);
+		                $response = $s3->create_object($app->s3bucket, $path, $opt);
+
+		                $uploadS3result &= $response->isOK();
+					}				
+				case 2:
+					LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
+					if (!empty($alternate_fname))
+					{
+						copy(LOCAL_UPLOAD_PATH.'/'.$object, LOCAL_UPLOAD_PATH.'/'.$alternate_fname);
+					}
+				break;
+			}
+
+			$v->insert();
+			
+			if (!$uploadS3result){
+				$Error->add('uploadS3', 'Could not upload file(s) to AmazonS3!');
+				$Error->alert();
+				
+				$version_number = $_POST['version_number'];
+				$human_version  = $_POST['human_version'];
+				$release_notes  = $_POST['release_notes'];
+				$alternate_fname  = $_POST['alternate_fname'];
+			}else {
+				redirect('versions.php?id=' . $app->id);
+			}
 		}
 		else
 		{
 			$version_number = $_POST['version_number'];
 			$human_version  = $_POST['human_version'];
 			$release_notes  = $_POST['release_notes'];
+			$alternate_fname  = $_POST['alternate_fname'];
 		}
 	}
 	else
@@ -116,8 +125,9 @@
 		$version_number = '';
 		$human_version  = '';
 		$release_notes  = '';
+		$alternate_fname = '';
 	}
-	
+		
 	// It would be better to use PHP's native OpenSSL extension
 	// but it's PHP 5.3+ only. Too early to force that requirement
 	// upon users.
@@ -153,6 +163,7 @@
                             <h2>Applications</h2>
 							<ul>
 								<li><a href="application.php?id=<?PHP echo $app->id; ?>"><?PHP echo $app->name; ?></a></li>
+								<li><a href="license-types.php?id=<?PHP echo $app->id; ?>">License types</a></li>
 								<li><a href="versions.php?id=<?PHP echo $app->id; ?>">Versions</a></li>
 								<li class="active"><a href="version-new.php?id=<?PHP echo $app->id; ?>">Release New Version</a></li>
 							</ul>
@@ -160,6 +171,14 @@
                         </div>
                         <div class="bd">
 							<form action="version-new.php?id=<?PHP echo $app->id; ?>" method="post" enctype="multipart/form-data">
+								<p><label for="version_status">Version Status</label>
+									<select name="version_status" id="version_status">
+										<option value="<?php echo VERSION_STATUS_PRODUCTION; ?>"> Production
+										<option value="<?php echo VERSION_STATUS_BETA; ?>"> Beta
+										<option value="<?php echo VERSION_STATUS_TEST; ?>"> Test
+									</select>
+								</p>
+								<p><label for="alternate_fname">Alternate Filename (optional)</label> <input type="text" name="alternate_fname" id="alternate_fname" value="<?PHP echo $alternate_fname;?>" class="text"><span class="info">ex.: yourappname.dmg</span></p>
 								<p><label for="version_number">Sparkle Version Number</label> <input type="text" name="version_number" id="version_number" value="<?PHP echo $version_number;?>" class="text"></p>
 								<p><label for="human_version">Human Readable Version Number</label> <input type="text" name="human_version" id="human_version" value="<?PHP echo $human_version;?>" class="text"></p>
 								<p><label for="release_notes">Release Notes</label> <textarea class="text" name="release_notes" id="release_notes"><?PHP echo $release_notes; ?></textarea></p>

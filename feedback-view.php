@@ -69,15 +69,15 @@
 							<table class="lines">
 								<tr>
 									<th>App Name</th>
-									<td><?PHP echo $f->appname . ' ' . $f->appversion;?></td>
+									<td><?PHP echo $f->__appname . ' ' . $f->__appversion;?></td>
 								</tr>
 								<tr>
 									<th>System</th>
-									<td><?PHP echo $f->systemversion;?></td>
+									<td><?PHP echo $f->__systemversion;?></td>
 								</tr>
 								<tr>
 									<th>Email</th>
-									<td><a href="mailto:<?PHP echo $f->email;?>"><?PHP echo $f->email;?></a></td>
+									<td><a href="mailto:<?PHP echo $f->__email;?>"><?PHP echo $f->__email;?></a></td>
 								</tr>
 								<tr>
 									<th>Type</th>
@@ -90,7 +90,7 @@
 								<?PHP if($f->type == "feature") : ?>
 								<tr>
 									<th>Importance</th>
-									<td><?PHP echo $f->importance;?></td>
+									<td><?PHP echo $f->__importance;?></td>
 								</tr>
 								<?PHP endif; ?>
 								<?PHP if($f->type == "bug") : ?>
@@ -124,7 +124,7 @@
 						</div>
 						<div clcass="bd">
 							<form action="feedback-view.php?id=<?PHP echo $f->id; ?>" method="post" class="bd">
-								<textarea style="width:100%;" name="notes" id="notes"><?PHP echo $f->notes; ?></textarea>
+								<textarea style="width:100%;" name="notes" id="notes"><?PHP echo $f->__notes; ?></textarea>
 								<input type="submit" name="btnNotes" value="Save Notes" id="btnNotes">
 								<span class="info">Notes will NOT be sent or made visible to customers.</span>
 							</form>
@@ -159,8 +159,8 @@
      							<?PHP foreach($feedbacks as $f) : ?>
      							<tr>
      							    <td><?PHP echo time2str($f->dt); ?></td>
-     							    <td><?PHP echo $f->appname . ' ' . $f->appversion;?></td>
-     							    <td><a href="feedback-view.php?id=<?PHP echo $f->id; ?>"><?PHP echo ucwords($f->type); ?></a></td>
+     							    <td><?PHP echo $f->__appname . ' ' . $f->__appversion;?></td>
+     							    <td><a href="feedback-view.php?id=<?PHP echo $f->id; ?>"><?PHP echo ucwords($f->__type); ?></a></td>
      							</tr>
      							<?PHP endforeach; ?>
  					        </tbody>
@@ -227,6 +227,6 @@
 <?PHP include('inc/footer.inc.php'); ?>
 <script type="text/javascript" charset="utf-8">
 	$(function() {
-		$('#rapportive').load('rapportive.php?email=<?PHP echo $f->email; ?>');
+		$('#rapportive').load('rapportive.php?email=<?PHP echo $f->__email; ?>');
 	});
 </script>

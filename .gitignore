@@ -1,3 +1,2 @@
 class.config.php
-*.esproj
-.DS_Store
+.*

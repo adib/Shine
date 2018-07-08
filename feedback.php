@@ -47,9 +47,9 @@
 									<?PHP foreach($feedback as $f) : ?>
 									<tr class="<?PHP if($f->new == 1) echo "new"; ?>">
 										<td><?PHP echo $f->id; ?></td>
-										<td><?PHP echo $f->appname; ?> <?PHP echo $f->appversion; ?></td>
-										<td><?PHP echo $f->type; ?></td>
-										<td><a href="mailto:<?PHP echo $f->email; ?>"><?PHP echo $f->email; ?></a></td>
+										<td><?PHP echo $f->__appname; ?> <?PHP echo $f->__appversion; ?></td>
+										<td><?PHP echo $f->__type; ?></td>
+										<td><a href="mailto:<?PHP echo $f->__email; ?>"><?PHP echo $f->__email; ?></a></td>
 										<td><?PHP echo ($f->reply == 1) ? '<strong>Yes</strong>' : 'No'; ?></td>
 										<td><?PHP echo time2str($f->dt); ?></td>
 										<td><a href="feedback-view.php?id=<?PHP echo $f->id; ?>">View</a></td>

@@ -2,23 +2,66 @@
     // This is your basic, run of the mill appcast feed
 
 	require 'includes/master.inc.php';
+	require_once 'includes/class.config.php';
+	use UnitedPrototype\GoogleAnalytics;
 
-	$app = new Application($_GET['id']);
+	if (!empty($_GET['id'])) $app = new Application($_GET['id']);
+	else {
+		$app = new Application();
+		$app->select($_GET['abbr'], 'abbreviation');
+	}
 	if(!$app->ok()) die('Application not found');
+	
+	$status = VERSION_STATUS_PRODUCTION;
+	
+	if (!empty($_GET['status'])) {
+		$status = $_GET['status'] == 'beta' ? VERSION_STATUS_BETA : 
+			($_GET['status'] == 'test' ? VERSION_STATUS_TEST : VERSION_STATUS_PRODUCTION);
+		unset($_GET['status']);
+	}
 	
 	$db = Database::getDatabase();
 
 	// This table format is crap, but it future proofs us against Sparkle format changes
 	$ip = $_SERVER['REMOTE_ADDR'];
 	$dt = date("Y-m-d H:i:s");
-	$db->query("INSERT INTO shine_sparkle_reports (ip, dt) VALUES (:ip, :dt)", array('ip' => $ip, 'dt' => $dt));
+	$db->query("INSERT INTO shine_sparkle_reports (ip, dt, app_id) VALUES (:ip, :dt, :app_id)", array('ip' => $ip, 'dt' => $dt, 'app_id' => $app->id));
 	$id = $db->insertId();
 	foreach($_GET as $k => $v)
 		$db->query("INSERT INTO shine_sparkle_data (sparkle_id, `key`, data) VALUES (:id, :k, :v)", array('id' => $id, 'k' => $k, 'v' => $v));
 
-	$versions = DBObject::glob('Version', "SELECT * FROM shine_versions WHERE app_id = '{$app->id}' ORDER BY dt DESC LIMIT 10");
+	$versions = DBObject::glob('Version', "SELECT * FROM shine_versions WHERE app_id = '{$app->id}' AND status = ".$status." ORDER BY dt DESC LIMIT 10");
 
-	$db->query("UPDATE shine_versions SET updates = updates + 1 WHERE app_id = '{$app->id}' ORDER BY dt DESC LIMIT 1");
+	$db->query("UPDATE shine_versions SET updates = updates + 1 WHERE app_id = '{$app->id}' AND status = ".$status." ORDER BY dt DESC LIMIT 1");
+	
+	# Google Analytics
+	if ($app->use_ga == 1) {
+		$uuid_ga = abs(crc32($dt)); # unsigned crc32
+		// Initilize GA Tracker
+		$tracker = new GoogleAnalytics\Tracker($app->ga_key, $app->ga_domain);
+		
+		// Assemble Visitor information
+		// (could also get unserialized from database)
+		$visitor = new GoogleAnalytics\Visitor();
+		$visitor->setUniqueId($uuid_ga);
+		$visitor->setIpAddress($_SERVER['REMOTE_ADDR']);
+		$visitor->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+		$visitor->setScreenResolution('1024x768');
+		
+		$ga_country = null;
+		if ($app->ga_country == 1 && function_exists('geoip_country_code_by_name')) {
+			$ga_country = geoip_country_code_by_name($ip);
+			if ($ga_country == '') $ga_country = 'XX';
+		}
+		
+		// Assemble Session information
+		// (could also get unserialized from PHP session)
+		$session = new GoogleAnalytics\Session();
+		// Assemble Event information
+		$event = new GoogleAnalytics\Event($app->name, 'Update', $ga_country, null, true);
+		// Track event
+		$tracker->trackEvent($event, $session, $visitor);
+	}
 	
 	$pirate = false;
 	if(isset($_GET['serialNumber'])) {
@@ -38,12 +81,24 @@
 		<link><?PHP echo $app->link; ?></link>
 		<description>Most recent changes with links to updates.</description>
 		<language>en</language>
-		<?PHP foreach($versions as $v) : ?>
+		<?PHP
+			foreach($versions as $v) : 
+				switch ($app->storage)
+				{
+					case 0:
+					case 1:
+						$enclosureLink = (1 == $app->is_ssl ? "https" : "http") . "://" . $app->s3domain . "/" . $app->s3path . $v->url;
+					break;
+					case 2:
+						$enclosureLink = HTTP_SITE_NAME.'/dl/'.$v->url;
+					break;
+				}
+		?>
 		<item>
 			<title><?PHP echo $app->name; ?> <?PHP echo $v->human_version; ?></title>
 			<description><![CDATA[ <?PHP echo $v->release_notes; ?> ]]></description>
 			<pubDate><?PHP echo dater('D, d M Y H:i:s O', $v->dt); ?></pubDate>
-			<enclosure url="<?PHP echo $v->url; ?>" sparkle:shortVersionString="<?PHP echo $v->human_version; ?>" sparkle:version="<?PHP echo $v->version_number; ?>" length="<?PHP echo $v->filesize; ?>" type="application/octet-stream" sparkle:dsaSignature="<?PHP echo $v->signature; ?>" />
+			<enclosure url="<?PHP echo $enclosureLink; ?>" sparkle:shortVersionString="<?PHP echo $v->human_version; ?>" sparkle:version="<?PHP echo $v->version_number; ?>" length="<?PHP echo $v->filesize; ?>" type="application/octet-stream" sparkle:dsaSignature="<?PHP echo $v->signature; ?>" />
 		</item>
 		<?PHP endforeach; ?>
 		<?PHP if($pirate === true) : ?>

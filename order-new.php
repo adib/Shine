@@ -19,6 +19,7 @@
 			$o->last_name   = $_POST['last_name'];
 			$o->payer_email = $_POST['email'];
 			$o->app_id      = $_POST['app_id'];
+			$o->notes       = $_POST['notes'];
 			$o->type        = 'Manual';
 			$o->dt          = dater();
 			$o->item_name   = $app->name;
@@ -33,6 +34,7 @@
 			$first_name = $_POST['first_name'];
 			$last_name  = $_POST['last_name'];
 			$email      = $_POST['email'];
+			$notes      = $_POST['notes'];
 		}
 	}
 	else
@@ -40,26 +42,12 @@
 		$first_name = '';
 		$last_name  = '';
 		$email      = '';
+		$notes      = '';
 	}
 	
-	$applications = DBObject::glob('Application', 'SELECT * FROM applications ORDER BY name');
+	$applications = DBObject::glob('Application', 'SELECT * FROM shine_applications ORDER BY name');
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-	<script type="text/javascript" src="http://www.google.com/jsapi"></script>
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t6">
-
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -75,6 +63,7 @@
 								<p><label for="first_name">First Name</label> <input type="text" name="first_name" id="first_name" value="<?PHP echo $first_name; ?>" class="text"></p>
 								<p><label for="last_name">Last Name</label> <input type="text" name="last_name" id="last_name" value="<?PHP echo $last_name; ?>" class="text"></p>
 								<p><label for="email">Email</label> <input type="text" name="email" id="email" value="<?PHP echo $email; ?>" class="text"></p>
+								<p><p><label for="notes">Notes</label> <textarea name="notes" id="notes" class="text"><?PHP echo $notes; ?></textarea></p>
 								<p><input type="submit" name="btnCreateOrder" value="Create Order" id="btnCreateOrder"></p>
 							</form>
 						</div>
@@ -87,7 +76,4 @@
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>

@@ -3,7 +3,7 @@
 	$Auth->requireAdmin('login.php');
 	$nav = 'tweets';
 
-	$applications = DBObject::glob('Application', 'SELECT * FROM applications ORDER BY name');
+	$applications = DBObject::glob('Application', 'SELECT * FROM shine_applications ORDER BY name');
 	
 	if(isset($_GET['refresh']))
 	    include 'tweet-cron.php';
@@ -26,21 +26,29 @@
         redirect("http://twitter.com/home?status=@{$t->username}%20&in_reply_to={$t->tweet_id}");
     }
 
-    $sql = ''; $app_id = '';
-    if(isset($_GET['id']))
+    $sql = ''; $app_id = ''; $group = '';
+    if(isset($_GET['id']) && !empty($_GET['id']))
     {
         $sql = 'AND app_id = ' . intval($_GET['id']);
         $app_id = intval($_GET['id']);
     }
+	else
+	{
+		$group = ' GROUP BY tweet_id ';
+	}
     
     if(isset($_GET['read']))
     {
         $db = Database::getDatabase();
-        $db->query("UPDATE tweets SET new = 0 WHERE 1 = 1 $sql");
+        $db->query("UPDATE shine_tweets SET new = 0 WHERE 1 = 1 $sql");
         redirect("tweets.php?id=$app_id");
     }
 
-	$tweets = DBObject::glob('Tweet', "SELECT * FROM tweets WHERE deleted = 0 $sql ORDER BY dt DESC");
+	$tweets = DBObject::glob('Tweet', "SELECT * FROM shine_tweets WHERE deleted = 0 $sql $group ORDER BY dt DESC LIMIT 100");
+
+	$db = Database::getDatabase();
+	$available_apps = $db->getValues("SELECT id FROM shine_applications WHERE CHAR_LENGTH(tweet_terms) > 0");
+	$tweet_terms = $db->getValues("SELECT tweet_terms FROM shine_applications WHERE CHAR_LENGTH(tweet_terms) > 0");
 	
 	function twitterfy($str)
 	{
@@ -52,22 +60,7 @@
         return $str;
     }
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-	<link rel="stylesheet" href="js/jquery.fancybox.css" type="text/css" media="screen">
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t6">
-
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -80,13 +73,14 @@
 							<ul>
 								<li class="<?PHP if(!isset($_GET['id'])) echo 'active'; ?>"><a href="tweets.php">All Apps</a></li>
 								<?PHP foreach($applications as $a) : ?>
+								<?PHP if(!in_array($a->id, $available_apps)) continue; ?>
 								<li class="<?PHP if(@$_GET['id'] == $a->id) echo 'active'; ?>"><a href="tweets.php?id=<?PHP echo $a->id; ?>"><?PHP echo $a->name; ?></a></li>
 								<?PHP endforeach; ?>
 							</ul>
 							<div class="clear"></div>
                         </div>
                         <div class="bd">
-                            <table>
+                            <table class="lines">
                                 <tbody>
                                     <?PHP foreach($tweets as $t) : ?>
                                     <?PHP if($t->new) : ?>
@@ -131,10 +125,21 @@
                         <p><a href="tweets.php?id=<?PHP echo $app_id; ?>&amp;refresh=1">Refresh All</a></p>
                     </div>
                 </div>
+                <div class="block">
+                    <div class="hd">
+                        <h3>Tweet Terms</h3>
+                    </div>
+                    <div class="bd">
+						<ul class="biglist">
+							<?PHP foreach($tweet_terms as $tt) : ?>
+							<?PHP foreach(explode(',', $tt) as $term) : ?>
+							<li><a href="http://search.twitter.com/search?q=<?PHP echo urlencode($term); ?>"><?PHP echo $term; ?></a></li>
+							<?PHP endforeach; ?>
+							<?PHP endforeach; ?>
+						</ul>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>

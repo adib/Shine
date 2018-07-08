@@ -1,27 +1,28 @@
--- phpMyAdmin SQL Dump
--- version 2.9.1
--- http://www.phpmyadmin.net
+# Dump of table shine_activations
+# ------------------------------------------------------------
+
+CREATE TABLE `shine_activations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_id` int(11) DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL,
+  `serial_number` varchar(128) DEFAULT NULL,
+  `guid` varchar(255) DEFAULT NULL,
+  `dt` datetime DEFAULT NULL,
+  `ip` varchar(15) DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 -- 
--- Host: localhost
--- Generation Time: Jan 04, 2010 at 12:27 AM
--- Server version: 5.0.51
--- PHP Version: 5.3.0-0.dotdeb.8
--- 
--- Database: `shine`
+-- Table structure for table `shine_applications`
 -- 
 
--- --------------------------------------------------------
-
--- 
--- Table structure for table `applications`
--- 
-
-DROP TABLE IF EXISTS `applications`;
-CREATE TABLE `applications` (
+CREATE TABLE IF NOT EXISTS `shine_applications` (
   `id` int(11) NOT NULL auto_increment,
   `name` varchar(128) character set utf8 collate utf8_unicode_ci NOT NULL default '',
   `link` varchar(128) character set utf8 collate utf8_unicode_ci NOT NULL default '',
   `bundle_name` varchar(128) character set utf8 collate utf8_unicode_ci NOT NULL default '',
+  `upgrade_app_id` int(11) NOT NULL,
   `s3key` varchar(128) character set utf8 collate utf8_unicode_ci NOT NULL default '',
   `s3pkey` varchar(128) character set utf8 collate utf8_unicode_ci NOT NULL default '',
   `s3bucket` varchar(128) character set utf8 collate utf8_unicode_ci NOT NULL default '',
@@ -40,17 +41,18 @@ CREATE TABLE `applications` (
   `fs_security_key` varchar(45) NOT NULL,
   `i_use_this_key` varchar(45) NOT NULL,
   `tweet_terms` text NOT NULL,
+  `hidden` tinyint(4) NOT NULL,
+  `engine_class_name` varchar(128) character set utf8 collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `downloads`
+-- Table structure for table `shine_downloads`
 -- 
 
-DROP TABLE IF EXISTS `downloads`;
-CREATE TABLE `downloads` (
+CREATE TABLE IF NOT EXISTS `shine_downloads` (
   `id` int(11) NOT NULL auto_increment,
   `dt` datetime NOT NULL default '0000-00-00 00:00:00',
   `referer` varchar(255) collate utf8_unicode_ci NOT NULL default '',
@@ -68,16 +70,15 @@ CREATE TABLE `downloads` (
   `exec_time` float NOT NULL default '0',
   `num_queries` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=22251 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `feedback`
+-- Table structure for table `shine_feedback`
 -- 
 
-DROP TABLE IF EXISTS `feedback`;
-CREATE TABLE `feedback` (
+CREATE TABLE IF NOT EXISTS `shine_feedback` (
   `id` int(11) NOT NULL auto_increment,
   `appname` varchar(255) NOT NULL,
   `appversion` varchar(255) NOT NULL,
@@ -96,16 +97,15 @@ CREATE TABLE `feedback` (
   `reguser` varchar(255) NOT NULL,
   `regmail` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `options`
+-- Table structure for table `shine_options`
 -- 
 
-DROP TABLE IF EXISTS `options`;
-CREATE TABLE `options` (
+CREATE TABLE IF NOT EXISTS `shine_options` (
   `key` varchar(255) collate utf8_unicode_ci NOT NULL,
   `value` varchar(255) collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`key`)
@@ -114,11 +114,10 @@ CREATE TABLE `options` (
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `orders`
+-- Table structure for table `shine_orders`
 -- 
 
-DROP TABLE IF EXISTS `orders`;
-CREATE TABLE `orders` (
+CREATE TABLE IF NOT EXISTS `shine_orders` (
   `id` int(11) NOT NULL auto_increment,
   `app_id` int(11) NOT NULL,
   `dt` datetime NOT NULL,
@@ -153,90 +152,54 @@ CREATE TABLE `orders` (
   `hash` varchar(5) character set latin1 NOT NULL,
   `claimed` tinyint(4) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1962 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `pirated_serials`
+-- Table structure for table `shine_sessions`
 -- 
 
-DROP TABLE IF EXISTS `pirated_serials`;
-CREATE TABLE `pirated_serials` (
-  `id` int(11) NOT NULL auto_increment,
-  `app_id` int(11) NOT NULL,
-  `dt` datetime NOT NULL,
-  `guid` text NOT NULL,
-  `serial` text NOT NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10 ;
-
--- --------------------------------------------------------
-
--- 
--- Table structure for table `pirates`
--- 
-
-DROP TABLE IF EXISTS `pirates`;
-CREATE TABLE `pirates` (
-  `id` int(11) NOT NULL auto_increment,
-  `app_id` int(11) NOT NULL,
-  `ip` varchar(15) NOT NULL,
-  `guid` varchar(128) NOT NULL,
-  `dt` datetime NOT NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=108 ;
-
--- --------------------------------------------------------
-
--- 
--- Table structure for table `sessions`
--- 
-
-DROP TABLE IF EXISTS `sessions`;
-CREATE TABLE `sessions` (
+CREATE TABLE IF NOT EXISTS `shine_sessions` (
   `id` int(255) NOT NULL auto_increment,
   `data` text collate utf8_unicode_ci NOT NULL,
   `updated_on` int(10) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2147483648 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `sparkle_data`
+-- Table structure for table `shine_sparkle_data`
 -- 
 
-DROP TABLE IF EXISTS `sparkle_data`;
-CREATE TABLE `sparkle_data` (
+CREATE TABLE IF NOT EXISTS `shine_sparkle_data` (
   `sparkle_id` int(11) NOT NULL,
   `key` varchar(128) NOT NULL,
   `data` varchar(128) NOT NULL,
   KEY `sparkle_id` (`sparkle_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `sparkle_reports`
+-- Table structure for table `shine_sparkle_reports`
 -- 
 
-DROP TABLE IF EXISTS `sparkle_reports`;
-CREATE TABLE `sparkle_reports` (
+CREATE TABLE IF NOT EXISTS `shine_sparkle_reports` (
   `id` int(11) NOT NULL auto_increment,
   `dt` datetime NOT NULL,
   `ip` varchar(15) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26213 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `tweets`
+-- Table structure for table `shine_tweets`
 -- 
 
-DROP TABLE IF EXISTS `tweets`;
-CREATE TABLE `tweets` (
+CREATE TABLE IF NOT EXISTS `shine_tweets` (
   `id` int(11) NOT NULL auto_increment,
   `tweet_id` bigint(20) NOT NULL,
   `username` varchar(55) NOT NULL,
@@ -250,33 +213,32 @@ CREATE TABLE `tweets` (
   `deleted` tinyint(4) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `id` (`tweet_id`,`app_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=57 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `users`
+-- Table structure for table `shine_users`
 -- 
 
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `shine_users` (
   `id` int(11) NOT NULL auto_increment,
   `username` varchar(65) collate utf8_unicode_ci NOT NULL default '',
   `password` varchar(65) collate utf8_unicode_ci NOT NULL default '',
   `level` enum('user','admin') collate utf8_unicode_ci NOT NULL default 'user',
   `email` varchar(65) collate utf8_unicode_ci default NULL,
+  `twitter` varchar(128) collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 -- 
--- Table structure for table `versions`
+-- Table structure for table `shine_versions`
 -- 
 
-DROP TABLE IF EXISTS `versions`;
-CREATE TABLE `versions` (
+CREATE TABLE IF NOT EXISTS `shine_versions` (
   `id` int(11) NOT NULL auto_increment,
   `app_id` int(11) NOT NULL default '0',
   `human_version` varchar(128) collate utf8_unicode_ci NOT NULL,
@@ -288,6 +250,5 @@ CREATE TABLE `versions` (
   `downloads` int(11) NOT NULL default '0',
   `updates` int(11) NOT NULL,
   `signature` varchar(65) collate utf8_unicode_ci NOT NULL,
-  `pirate_count` int(11) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=94 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

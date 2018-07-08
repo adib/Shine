@@ -7,6 +7,13 @@
     // options depending on the server environment you're running on. Ex: local, staging,
     // and production.
 
+	// I highly reccomend NOT sending emails through your own server. They'll almost
+	// always get classified as spam. I use http://postmarkapp.com/ and have been
+	// extremely happy with the results. -Tyler
+	define('POSTMARKAPP_API_KEY', '');
+	define('POSTMARKAPP_MAIL_FROM_ADDRESS', '');
+	define('POSTMARKAPP_MAIL_FROM_NAME', '');
+
     class Config
     {
         // Singleton object. Leave $me alone.

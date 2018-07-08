@@ -50,6 +50,17 @@
 		$v->delete();
 		redirect('versions.php?id=' . $app->id);
 	}
+	
+	if(isset($_POST['btnSave']))
+	{
+		$v->version_number = $_POST['version_number'];
+		$v->human_version  = $_POST['human_version'];
+		$v->url = $_POST['url'];
+		$v->release_notes  = $_POST['release_notes'];
+		$v->filesize = $_POST['filesize'];
+		$v->signature = $_POST['signature'];
+		$v->update();	
+	}
 
 	$version_number = $v->version_number;
 	$human_version  = $v->human_version;
@@ -58,21 +69,7 @@
 	$signature      = $v->signature;
 	$filesize       = $v->filesize;	
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t0">
-
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -85,7 +82,6 @@
 							<ul>
 								<li><a href="application.php?id=<?PHP echo $app->id; ?>"><?PHP echo $app->name; ?></a></li>
 								<li class="active"><a href="versions.php?id=<?PHP echo $app->id; ?>">Versions</a></li>
-								<li><a href="pirates.php?id=<?PHP echo $app->id; ?>">Pirates</a></li>
 								<li><a href="version-new.php?id=<?PHP echo $app->id; ?>">Release New Version</a></li>
 							</ul>
 							<div class="clear"></div>
@@ -98,12 +94,9 @@
 								<p><label for="release_notes">Release Notes</label> <textarea class="text" name="release_notes" id="release_notes"><?PHP echo $release_notes; ?></textarea></p>
 								<p><label for="filesize">Filesize</label> <input type="text" name="filesize" id="filesize" value="<?PHP echo $filesize; ?>" class="text"></p>
 								<p><label for="signature">Sparkle Signature</label> <input type="text" name="signature" id="signature" value="<?PHP echo $signature; ?>" class="text"></p>
-								<p><input type="submit" name="btnDelete" value="Delete Version" id="btnDelete" onclick="return confirm('Are you sure?');">
-								<!-- BEGIN adib 7-Apr-2010 18:52 -->
-								&nbsp;
-								<input type="submit" name="btnUpdate" value="Update Version Data" id="btnUpdate" onclick="return confirm('Update version data?');">
-								<!-- END adib 7-Apr-2010 18:52 -->
-								</p>
+                                <p><input type="submit" name="btnUpdate" value="Update Version Data" id="btnUpdate" onclick="return confirm('Update version data?');"></p>
+                                <p><input type="submit" name="btnDelete" value="Delete Version" id="btnDelete" onclick="return confirm('Are you sure?');"></p>
+								<p><input type="submit" name="btnSave" value="Save" id="btnSave"></p>
 							</form>
 						</div>
 					</div>
@@ -115,7 +108,4 @@
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>

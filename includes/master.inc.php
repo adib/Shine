@@ -1,4 +1,6 @@
 <?PHP
+	date_default_timezone_set('America/Chicago');
+
     // Application flag
     define('SPF', true);
 	define('DEFAULT_IPN_URL', 'https://www.paypal.com/cgi-bin/webscr?');
@@ -11,7 +13,8 @@
     require DOC_ROOT . '/includes/functions.inc.php'; // __autoload() is contained in this file
     require DOC_ROOT . '/includes/class.dbobject.php';
     require DOC_ROOT . '/includes/class.objects.php';
-    require DOC_ROOT . '/includes/ap.inc.php'; // AquaticPrime functions
+    require DOC_ROOT . '/includes/markdown.inc.php';
+    require DOC_ROOT . '/includes/Postmark.php';
 
     // Fix magic quotes
     if(get_magic_quotes_gpc())

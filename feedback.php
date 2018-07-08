@@ -7,28 +7,14 @@
 	{
 		$db = Database::getDatabase();
 		$type = mysql_real_escape_string($_GET['type'], $db->db);
-		$feedback = DBObject::glob('Feedback', "SELECT * FROM feedback WHERE type = '$type' ORDER BY dt DESC");
+		$feedback = DBObject::glob('Feedback', "SELECT * FROM shine_feedback WHERE type = '$type' ORDER BY dt DESC");
 	}
 	else
 	{
-		$feedback = DBObject::glob('Feedback', "SELECT * FROM feedback ORDER BY dt DESC");
+		$feedback = DBObject::glob('Feedback', "SELECT * FROM shine_feedback ORDER BY dt DESC");
 	}
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t0">
-
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -45,7 +31,7 @@
 							<div class="clear"></div>
                         </div>
                         <div class="bd">
-                            <table>
+                            <table class="lines">
                                 <thead>
                                     <tr>
 										<td>ID</td>
@@ -63,7 +49,7 @@
 										<td><?PHP echo $f->id; ?></td>
 										<td><?PHP echo $f->appname; ?> <?PHP echo $f->appversion; ?></td>
 										<td><?PHP echo $f->type; ?></td>
-										<td><?PHP echo $f->email; ?></td>
+										<td><a href="mailto:<?PHP echo $f->email; ?>"><?PHP echo $f->email; ?></a></td>
 										<td><?PHP echo ($f->reply == 1) ? '<strong>Yes</strong>' : 'No'; ?></td>
 										<td><?PHP echo time2str($f->dt); ?></td>
 										<td><a href="feedback-view.php?id=<?PHP echo $f->id; ?>">View</a></td>
@@ -81,7 +67,4 @@
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>

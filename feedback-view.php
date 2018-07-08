@@ -22,25 +22,31 @@
 		$f->new = 0;
 		$f->update();
 	}
-?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-	<style type="text/css" media="screen">
-		th { text-align:right; font-weight:bold; }
-	</style>
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t0">
+	
+	if(isset($_POST['btnNotes']))
+	{
+		$f->notes = $_POST['notes'];
+		$f->update();
+		redirect('feedback-view.php?id=' . $f->id);
+	}
 
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+	// Get related orders
+	$db = Database::getDatabase();
+	$email = $db->quote($f->email);
+	$orders = DBObject::glob('Order', 'SELECT * FROM shine_orders WHERE payer_email = ' . $email .  ' ORDER BY dt DESC');
+
+ 	// Get related feedbacks
+ 	$email = $db->quote($f->email);
+ 	$feedbacks = DBObject::glob('Feedback', 'SELECT * FROM shine_feedback WHERE email = ' . $email .  ' AND id <> ' . $f->id . ' ORDER BY dt DESC');
+
+	// Get related activations
+	$order_ids = array(-1); // -1 prevents sql error when no orders are added to the array
+	foreach($orders as $o)
+		$order_ids[] = $o->id;
+	$order_ids = implode(',', $order_ids);
+	$activations = DBObject::glob('Activation', "SELECT * FROM shine_activations WHERE (order_id IN ($order_ids)) OR (ip = '{$f->ip}') ORDER BY dt DESC");
+?>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -54,13 +60,13 @@
 								<li><a href="feedback.php?type=support">Support Questions</a></li>
 								<li><a href="feedback.php?type=bug">Bug Reports</a></li>
 								<li><a href="feedback.php?type=feature">Feature Requests</a></li>
-								<li class="active"><a href="feedback-view.php?id=<?PHP echo $f->id; ?>">Ticket #<?PHP echo $f->id; ?></a></li>
+								<li class="active"><a href="feedback-view.php?id=<?PHP echo $f->id; ?>">Feedback #<?PHP echo $f->id; ?></a></li>
 							</ul>
 							<div class="clear"></div>
                         </div>
                         <div class="bd">
 
-							<table>
+							<table class="lines">
 								<tr>
 									<th>App Name</th>
 									<td><?PHP echo $f->appname . ' ' . $f->appversion;?></td>
@@ -108,18 +114,119 @@
 									<input type="submit" name="btnNew" value="Mark as New" id="btnnew"/>
 									<input type="submit" name="btnDelete" value="Delete" id="btndelete" onclick="return confirm('Are you sure?');"/>
 								</p>
-							</form>					
-	
+							</form>
 						</div>
-					</div>              
+					</div>
+
+                    <div class="block">
+                        <div class="hd">
+                            <h2>Feedback Notes</h2>
+						</div>
+						<div clcass="bd">
+							<form action="feedback-view.php?id=<?PHP echo $f->id; ?>" method="post" class="bd">
+								<textarea style="width:100%;" name="notes" id="notes"><?PHP echo $f->notes; ?></textarea>
+								<input type="submit" name="btnNotes" value="Save Notes" id="btnNotes">
+								<span class="info">Notes will NOT be sent or made visible to customers.</span>
+							</form>
+						</div>
+					</div>
+
                 </div></div>
             </div>
             <div id="sidebar" class="yui-b">
+				<div class="block">
+					<div class="hd">
+						<h3>Customer Info</h3>
+					</div>
+					<div id="rapportive" class="bd"></div>
+				</div>
+
+
+  				<div class="block">
+  					<div class="hd">
+ 						<h2>Related Feedback</h2>
+ 					</div>
+ 					<div class="bd">
+ 					    <table>
+ 					        <thead>
+ 					            <tr>
+ 					                <td>Date</td>
+ 					                <td>App Name</td>
+ 					                <td>Type</td>
+ 					            </tr>
+ 					        </thead>
+ 					        <tbody>
+     							<?PHP foreach($feedbacks as $f) : ?>
+     							<tr>
+     							    <td><?PHP echo time2str($f->dt); ?></td>
+     							    <td><?PHP echo $f->appname . ' ' . $f->appversion;?></td>
+     							    <td><a href="feedback-view.php?id=<?PHP echo $f->id; ?>"><?PHP echo ucwords($f->type); ?></a></td>
+     							</tr>
+     							<?PHP endforeach; ?>
+ 					        </tbody>
+ 					    </table>
+ 					</div>
+ 				</div>
+
+				<div class="block">
+					<div class="hd">
+						<h2>Related Orders</h2>
+					</div>
+					<div class="bd">
+					    <table>
+					        <thead>
+					            <tr>
+					                <td>Date</td>
+					                <td>Name</td>
+					                <td>App Name</td>
+					            </tr>
+					        </thead>
+					        <tbody>
+    							<?PHP foreach($orders as $o) : ?>
+    							<tr>
+    							    <td><?PHP echo time2str($o->dt); ?></td>
+    							    <td><a href="order.php?id=<?PHP echo $o->id; ?>"><?PHP echo utf8_encode($o->first_name); ?> <?PHP echo utf8_encode($o->last_name); ?></a></td>
+    							    <td><?PHP echo $o->applicationName(); ?></td>
+    							</tr>
+    							<?PHP endforeach; ?>
+					        </tbody>
+					    </table>
+					</div>
+				</div>							
+
+				<div class="block">
+					<div class="hd">
+						<h2>Related Activations</h2>
+					</div>
+					<div class="bd">
+					    <table>
+					        <thead>
+					            <tr>
+					                <td>Date</td>
+					                <td>App Name</td>
+					                <td>IP</td>
+					            </tr>
+					        </thead>
+					        <tbody>
+    							<?PHP foreach($activations as $a) : ?>
+    							<tr>
+    							    <td><?PHP echo time2str($a->dt); ?></td>
+    							    <td><?PHP echo $a->applicationName(); ?></td>
+    							    <td><a href="activations.php?q=<?PHP echo $a->ip; ?>"><?PHP echo $a->ip; ?></a></td>
+    							</tr>
+    							<?PHP endforeach; ?>
+					        </tbody>
+					    </table>
+					</div>
+				</div>							
+
 				
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>
+<script type="text/javascript" charset="utf-8">
+	$(function() {
+		$('#rapportive').load('rapportive.php?email=<?PHP echo $f->email; ?>');
+	});
+</script>

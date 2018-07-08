@@ -123,7 +123,7 @@
 	// upon users.
     function sign_file($filename, $keydata)
     {
-        $binary_hash = shell_exec('openssl dgst -sha1 -binary < ' . $filename);
+        $binary_hash = shell_exec('/usr/bin/openssl dgst -sha1 -binary < ' . $filename);
         $hash_tmp_file = tempnam('/tmp', 'foo');
         file_put_contents($hash_tmp_file, $binary_hash);
 
@@ -132,32 +132,16 @@
             $keydata = "-----BEGIN DSA PRIVATE KEY-----\n" . $keydata . "\n-----END DSA PRIVATE KEY-----\n";        
         file_put_contents($key_tmp_file, $keydata);
 
-        $signed_data = shell_exec("openssl dgst -dss1 -sign $key_tmp_file < $hash_tmp_file");
-		
-		// BEGIN adib 7-Apr-2010 12:47
-		// delete the key and hash file since leaving it around may be a security issue in shared web hosting environments.
-		unlink($key_tmp_file);
-		unlink($hash_tmp_file);
-		// END adib 7-Apr-2010 12:47
+        $signed_data = shell_exec("/usr/bin/openssl dgst -dss1 -sign $key_tmp_file < $hash_tmp_file");
+        
+        // delete the key and hash file since leaving it around may be a security issue in shared web hosting environments.
+        unlink($key_tmp_file);
+        unlink($hash_tmp_file);
 
         return base64_encode($signed_data);     
     }
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t0">
-
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -170,7 +154,6 @@
 							<ul>
 								<li><a href="application.php?id=<?PHP echo $app->id; ?>"><?PHP echo $app->name; ?></a></li>
 								<li><a href="versions.php?id=<?PHP echo $app->id; ?>">Versions</a></li>
-								<li><a href="pirates.php?id=<?PHP echo $app->id; ?>">Pirates</a></li>
 								<li class="active"><a href="version-new.php?id=<?PHP echo $app->id; ?>">Release New Version</a></li>
 							</ul>
 							<div class="clear"></div>
@@ -221,7 +204,4 @@
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>

@@ -3,50 +3,67 @@
 	$Auth->requireAdmin('login.php');
 	$nav = 'stats';
 
-	$applications = DBObject::glob('Application', 'SELECT * FROM applications ORDER BY name');
-
 	$db = Database::getDatabase();
-	$keys = $db->getValues("SELECT DISTINCT(`key`) FROM sparkle_data");
 
-	$charts = array();
-	foreach($keys as $k)
+	$applications = DBObject::glob('Application', 'SELECT * FROM shine_applications ORDER BY name');
+
+	$chart_app_activity = new Chart();
+	$chart_app_activity->id          = 'chart_app_activity';
+	$chart_app_activity->type        = 'column';
+	$chart_app_activity->title       = 'App Activity by Week';
+	$chart_app_activity->yAxisTitle  = '# Sparkle Updates';
+	$chart_app_activity->xColumnName = 'YEARWEEK(dt)';
+	$chart_app_activity->yColumnName = 'COUNT(*)';
+	$chart_app_activity->query       = 'SELECT COUNT(*), YEARWEEK(dt) FROM `shine_sparkle_reports` GROUP BY YEARWEEK(dt) ORDER BY YEARWEEK(dt) ASC';
+
+	Class Chart
 	{
-		$data = array();
-		$rows = $db->getRows("SELECT COUNT(*) as num, `data` FROM sparkle_data WHERE `key` = '$k' GROUP BY `data` ORDER BY num DESC");
-		
-		$count = 0;
-		$total = 0;
-		foreach($rows as $row)
+		public $id;
+		public $type;
+		public $title;
+		public $xColumnName;
+		public $yColumnName;
+		public $query;
+		public $appID;
+		public $yAxisTitle;
+
+		private $data;
+
+		public function run()
 		{
-			if($count++ < 5) // Limit the pie chart to the top 5 values
+			$db = Database::getDatabase();
+			$rows = $db->getRows($this->query);
+
+			$this->data = array();
+			foreach($rows as $row)
 			{
-				$data[$row['data']] = $row['num'];
-				$total += $row['num'];
+				$x = $row[$this->xColumnName];
+				$y = $row[$this->yColumnName];
+				$this->data[$x] = $y;
 			}
 		}
 		
-		$charts[$k] = $data;
-	}
-	
-	unset($charts['id']);
-	unset($charts['appName']);
-	unset($charts['appVersion']);
-?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t0">
+		public function render()
+		{
+			$this->run();
 
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+			$categories = array_keys($this->data);
+			$categories = "'" . implode(',', $categories) . "'";
+			$data = implode(',', $this->data);
+
+			$out  = "{$this->id} = new Highcharts.Chart({";
+			$out .= "chart: { renderTo: '{$this->id}', defaultSeriesType: 'column' },";
+			$out .= "title: { text: '{$this->title}' },";
+			$out .= "xAxis: { categories: [$categories] },";
+			$out .= "yAxis: { title: { text: '{$this->yAxisTitle}' } },";
+			$out .= "series: [{ data: [$data] },]";
+			$out .= "});";
+
+			echo $out;
+		}
+	}
+?>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -65,21 +82,15 @@
 							<div class="clear"></div>
                         </div>
 					</div>
-					
-					<?PHP foreach($charts as $title => $data) : ?>
-					<div class="block" style="float:left;margin-right:2em;">
+
+					<div class="block" style="float:left;margin-right:2em;width:100%;">
 						<div class="hd">
-							<h2><?PHP echo $title; ?></h2>
+							<h2>OS Version</h2>
 						</div>
 						<div class="bd">
-							<?PHP
-								$gc = new googleChart(implode(',', $data), 'pie');
-								$gc->setLabels(implode('|', array_keys($data)));
-								$gc->draw(true);
-							?>
+							<div id="chart_app_activity" class="chart"></div>
 						</div>
 					</div>
-					<?PHP endforeach; ?>
               
                 </div></div>
             </div>
@@ -88,7 +99,9 @@
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>
+<script type="text/javascript" charset="utf-8">
+	$(document).ready(function() {
+		<?PHP $chart_app_activity->render(); ?>
+	});
+</script>

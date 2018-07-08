@@ -22,6 +22,7 @@
 			$u->username   = $_POST['username'];
 			$u->email      = $_POST['email'];
 			$u->level      = $_POST['level'];
+			$u->twitter    = trim($_POST['twitter']);
 
             // Leave the password alone if it's not set
             if(!empty($_POST['password']))
@@ -35,6 +36,7 @@
 			$username = $_POST['username'];
 			$email    = $_POST['email'];
 			$level    = $_POST['level'];
+			$twitter  = $_POST['twitter'];
 		}
 	}
 	else
@@ -42,23 +44,10 @@
 		$username  = $u->username;
 		$email     = $u->email;
 		$level     = $u->level;
+		$twitter   = $u->twitter;
 	}
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
- "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Shine</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-    <link rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" type="text/css">
-    <link rel="stylesheet" href="css/yuiapp.css" type="text/css">
-</head>
-<body class="rounded">
-    <div id="doc3" class="yui-t6">
-
-        <div id="hd">
-            <?PHP include('inc/header.inc.php'); ?>
-        </div>
+<?PHP include('inc/header.inc.php'); ?>
 
         <div id="bd">
             <div id="yui-main">
@@ -77,6 +66,7 @@
 							<form action="user-edit.php?id=<?PHP echo $u->id; ?>" method="post">
 								<p><label for="username">Username</label> <input type="text" name="username" id="username" value="<?PHP echo $username; ?>" class="text"></p>
 								<p><label for="password">Password</label> <input type="password" name="password" id="password" value="" class="text"><span class="info">Leave the password blank if you do not wish to change it</span></p>
+								<p><label for="twitter">Twitter Username</label> <input type="text" name="twitter" id="twitter" value="<?PHP echo $twitter; ?>" class="text"><span class="info">We'll use your Twitter avatar throughout the site</span></p>
 								<p><label for="email">Email</label> <input type="text" name="email" id="email" value="<?PHP echo $email; ?>" class="text"></p>
 								<p><label for="level">Level</label>
 								    <select name="level" id="level">
@@ -96,7 +86,4 @@
             </div>
         </div>
 
-        <div id="ft"></div>
-    </div>
-</body>
-</html>
+<?PHP include('inc/footer.inc.php'); ?>

@@ -182,7 +182,7 @@ To changes some colors (you can supply more than needed)
  * @param string $dimensions
  */
 class googleChart {
-	var $url='http://chart.apis.google.com/chart?';
+	var $url='//chart.apis.google.com/chart?';
 	var $simple = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; //simple data chart
 	var $numericBase='t'; //'t' = numeric 0-1000 url data, 's' = simple 0..61 data
 	var $dimensions='450x200'; 

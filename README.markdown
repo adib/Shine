@@ -8,9 +8,11 @@ Basic Usage
 -----------
 1. Unzip the installation folder into a non obvious directory on your web root directory.
 2. Create a database, and import the mysql.sql file from the Shine folder.
-3. Create a user in the 'users' table.
-4. Rename /includes/class.config.sample.php to /includes/class.config.php and modify to suit your server settings.
-5. Done, visit the webpage and login.
+4. Import the `changelog.sql` file from the Shine folder.
+5. Create a user in the 'users' table.
+6. Rename /includes/class.config.sample.php to /includes/class.config.php and modify to suit your server settings.
+7  Rename `/aws-sdk-for-php/config-sample.inc.php` into `config.inc.php` and modify it to suit your server settings
+8. Done, visit the webpage and login.
 
 License
 -------

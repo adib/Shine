@@ -16,6 +16,7 @@
 		$allAppsVersionsList = scandir(LOCAL_UPLOAD_PATH);
 		$versions = $app->versions();
 		$versionsList = array();
+		$altVersionsList = array();
 		foreach ($versions as $v)
 		{
 			$versionsList[] = $v->url;

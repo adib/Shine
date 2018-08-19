@@ -43,7 +43,7 @@ if ($a->ok()) {
 					FROM shine_versions 
 					WHERE app_id = ".$a->id." AND 
 						status = ".$status." " .
-						(!empty($version) ? "AND human_version = '".$version."'" : "ORDER BY dt DESC")." LIMIT 1");
+						(!empty($version) ? "AND version_number = '".$version."'" : "ORDER BY dt DESC")." LIMIT 1");
 	$v = array_pop($v);
 	if (is_object($v) && get_class($v) == 'Version') {
 		$v->downloads++;

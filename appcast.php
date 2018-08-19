@@ -90,7 +90,7 @@
 						$enclosureLink = (1 == $app->is_ssl ? "https" : "http") . "://" . $app->s3domain . "/" . $app->s3path . $v->url;
 					break;
 					case 2:
-						$enclosureLink = HTTP_SITE_NAME.'/dl/'.$v->url;
+						$enclosureLink = HTTP_SITE_NAME.'/download.php?id=' . urlencode($app->id) . '&amp;version=' . urlencode($v->version_number) . '&amp;status=' . urlencode($v->status);
 					break;
 				}
 		?>

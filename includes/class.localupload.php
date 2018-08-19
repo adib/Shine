@@ -1,5 +1,4 @@
 <?PHP
-require_once 'includes/master.inc.php';
 
 class LocalUpload {
 	public static function uploadFile($fs_path, $name) {
@@ -8,6 +7,11 @@ class LocalUpload {
 	}
 	
 	public static function deleteFile($name) {
-		return unlink(LOCAL_UPLOAD_PATH.'/'.$name);
+		$resultCode = unlink(LOCAL_UPLOAD_PATH.'/'.$name);
+		if (!empty($alternate_fname))
+		{
+			unlink(LOCAL_UPLOAD_PATH.'/'.$alternate_fname);
+		}
+		return $resultCode;
 	}
 }

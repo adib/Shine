@@ -93,7 +93,8 @@
 					LocalUpload::uploadFile($_FILES['file']['tmp_name'], $object);
 					if (!empty($alternate_fname))
 					{
-						copy(LOCAL_UPLOAD_PATH.'/'.$object, LOCAL_UPLOAD_PATH.'/'.$alternate_fname);
+						#copy(LOCAL_UPLOAD_PATH.'/'.$object, LOCAL_UPLOAD_PATH.'/'.$alternate_fname);
+						link(LOCAL_UPLOAD_PATH.'/'.$object, LOCAL_UPLOAD_PATH.'/'.$alternate_fname);
 					}
 				break;
 			}

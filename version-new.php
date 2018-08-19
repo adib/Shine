@@ -142,7 +142,7 @@
             $keydata = "-----BEGIN DSA PRIVATE KEY-----\n" . $keydata . "\n-----END DSA PRIVATE KEY-----\n";        
         file_put_contents($key_tmp_file, $keydata);
 
-        $signed_data = shell_exec("/usr/bin/openssl dgst -dss1 -sign $key_tmp_file < $hash_tmp_file");
+        $signed_data = shell_exec("/usr/bin/openssl dgst -sha1 -sign $key_tmp_file < $hash_tmp_file");
         
         // delete the key and hash file since leaving it around may be a security issue in shared web hosting environments.
         unlink($key_tmp_file);

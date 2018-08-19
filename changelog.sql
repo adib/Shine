@@ -162,3 +162,8 @@ UPDATE shine_activations SET sent_to_qcrm=1
 -- 2013.02.05 reset sent_to_qcrm flag for all old activations
 
 UPDATE `shine_activations` SET sent_to_qcrm=0 WHERE dt < '2013-02-01'
+
+-- 2018.08.20 Extend signature length to match Sparkle and then some
+
+ALTER TABLE `shine_versions` CHANGE `signature` `signature` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;
+

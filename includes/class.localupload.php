@@ -1,6 +1,5 @@
 <?PHP
-
-define('LOCAL_UPLOAD_PATH', dirname(DOC_ROOT).'/shine_uploads');
+require_once 'includes/master.inc.php';
 
 class LocalUpload {
 	public static function uploadFile($fs_path, $name) {

@@ -11,6 +11,9 @@
     // Determine our absolute document root
     define('DOC_ROOT', realpath(dirname(__FILE__) . '/../'));
 
+    define('LOCAL_UPLOAD_PATH', DOC_ROOT . '/shine_uploads');
+
+
     // Global include files
     require DOC_ROOT . '/includes/functions.inc.php'; // __autoload() is contained in this file
     require DOC_ROOT . '/includes/class.dbobject.php';

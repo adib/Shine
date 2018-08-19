@@ -5,9 +5,7 @@
 	$Auth->requireAdmin('login.php');
 	$nav = 'applications';
 	
-	// BEGIN adib 7-Apr-2010 12:44
  	$Config = Config::getConfig();
-	// END adib 7-Apr-2010 12:44
 	
 	$app = new Application($_GET['id']);
 	if(!$app->ok()) redirect('index.php');
@@ -132,6 +130,7 @@
 	// It would be better to use PHP's native OpenSSL extension
 	// but it's PHP 5.3+ only. Too early to force that requirement
 	// upon users.
+	// TODO: migrate this to OpenSSL since some hosts disables shell_exec
     function sign_file($filename, $keydata)
     {
         $binary_hash = shell_exec('/usr/bin/openssl dgst -sha1 -binary < ' . $filename);

@@ -15,11 +15,13 @@
 
 
     // Global include files
+	require_once DOC_ROOT . '/includes/class.config.php';
     require DOC_ROOT . '/includes/functions.inc.php'; // __autoload() is contained in this file
     require DOC_ROOT . '/includes/class.dbobject.php';
     require DOC_ROOT . '/includes/class.objects.php';
     require DOC_ROOT . '/includes/markdown.inc.php';
     require DOC_ROOT . '/includes/Postmark.php';
+
 
     // Fix magic quotes
     if(get_magic_quotes_gpc())
